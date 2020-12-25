@@ -4,4 +4,5 @@
 tmp/
 
 *.html
-custom.el
+config.el
+packages.el
