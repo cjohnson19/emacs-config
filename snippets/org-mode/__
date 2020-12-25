@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: Org template
+# --
+#+TITLE:        ${1:Untitled Document}
+#+SUBTITLE:     ${2:}
+#+AUTHOR:       ${3:`user-full-name`}
+#+EMAIL:        ${4:`user-mail-address`}
+#+DATE:         {{{modification-time(%Y-%m-%d %H:%M, t)\}\}\}; {{{timezone\}\}\}
+#+macro:        timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
+#+startup:      fold
+#+property:     header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
+#+property:     header-args:shell :tangle "setup.sh"
+#+property:     header-args :tangle no :results silent
+#+LATEX_HEADER: \\usepackage[margin=1in]{geometry\}

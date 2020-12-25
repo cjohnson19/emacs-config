@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: Daily Schedule
+# key: daily-schedule
+# uuid: daily-schedule
+# --
+
+* Daily Schedule
+** Morning Routine
+*** TODO Clean room and make bed
+*** TODO Meditate
+*** TODO Breakfast
+*** TODO Brush Teeth
+
+** School Work

@@ -1,0 +1,1225 @@
+#+TITLE:        Doom Emacs Configuration
+#+SUBTITLE:     Spending way too much time on settings
+#+AUTHOR:       Chase Johnson
+#+EMAIL:        joh13266@umn.edu
+#+DATE:         {{{modification-time(%Y-%m-%d %H:%M, t)}}}; {{{timezone}}}
+#+macro:        timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
+#+startup:      fold
+#+property:     header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
+#+property:     header-args :tangle no :results silent
+
+#+begin_quote
+When you write a program, think of it primarily as a work of literature.
+You're trying to write something that human beings are going to read.
+Don't think of it primarily as something a computer is going to follow.
+The more effective you are at making your program readable, the more effective it's going to be: You'll understand it today, you'll understand it next week, and your successors who are going to maintain and modify it will understand it.
+--- Donald Knuth
+#+end_quote
+
+* Intro
+Creating a fully customized Emacs experience is almost mandatory.
+So, this is my crack at both creating a custom configuration and remaining aware of what I've done later on.
+* Basic Configurations
+Make this file run better with lexical binding
+#+begin_src emacs-lisp :comments no
+;;; config.el -*- lexical-binding: t; -*-
+#+end_src
+** Personal Information
+This gets inserted automatically when using things like ~org-mode~, ~GPG~, ~email~, and more.
+#+begin_src emacs-lisp
+(setq user-full-name "Chase Johnson"
+      user-mail-address "joh13266@umn.edu")
+#+end_src
+** Better Defaults
+*** Simple Settings
+Improving some... /interesting/... default variable choices.
+#+begin_src emacs-lisp
+(setq-default
+ delete-by-moving-to-trash t ; Deleted files go to the trash
+ x-stretch-cursor t)         ; Cursor stretches to fill glyph
+
+(setq evil-want-fine-undo t  ; Better undo
+      auto-save-default t)   ; Don't lose my work
+#+end_src
+*** Auto-customizations
+When changes are made via a customization interface, they are added to ~init.el~.
+That muddies up a pretty sensitive file, so add changes to a separate file and load those in instead.
+#+begin_src emacs-lisp
+(setq-default custom-file (expand-file-name ".custom.el" doom-private-dir))
+(when (file-exists-p custom-file)
+  (load custom-file))
+#+end_src
+** Doom Configuration
+*** Visuals
+**** Font
+I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has better ligature support.
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "Jetbrains Mono" :size 15)
+      doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
+      doom-big-font (font-spec :family "Jetbrains Mono" :size 24)
+      doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
+#+end_src
+I also prefer to have italicized font in more places like code comments or keywords in languages.
+#+begin_src emacs-lisp
+(custom-set-faces!
+  '(font-lock-comment-face :slant italic)
+  '(font-lock-keyword-face :slant italic))
+#+end_src
+**** Theme
+~doom-one~ is really nice, but I like the slight purple of ~doom-dracula~ particularly.
+#+begin_src emacs-lisp
+(setq doom-theme 'doom-dracula)
+#+end_src
+Sometimes the theme will overwrite previous font italic preferences - let's prevent that.
+#+begin_src emacs-lisp
+(after! doom-themes
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t))
+#+end_src
+I like to see the word count more often
+#+begin_src emacs-lisp
+(setq doom-modeline-enable-word-count t)
+(setq doom-modeline-continuous-word-count-modes '(org-mode markdown-mode))
+#+end_src
+**** Splash Image
+I set up a little lambda svg to serve as the splash screen.
+#+begin_src emacs-lisp
+(setq fancy-splash-image (expand-file-name "misc/lambda.svg" doom-private-dir))
+#+end_src
+**** Editor Changes
+I don't know how people get by with absolute line numbers.
+#+begin_src emacs-lisp
+(setq display-line-numbers-type 'relative)
+#+end_src
+* Package Loading
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle "packages.el" :comments no
+:END:
+This file shouldn't be byte compiled.
+#+begin_src emacs-lisp :tangle "packages.el" :comments no
+;;; -*- no-byte-compile: t; -*-
+#+end_src
+** Loading Packages
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle "packages.el"
+:END:
+This is where we install packages, by declaring them with ~package!~ macro, then running ~doom sync~.
+Afterwards, =M-x doom/reload= updates them.
+*** Org Mode
+**** Org Plot
+Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create nice graphics.
+This is a modified version that adds in ~radar~ charts.
+#+begin_src emacs-lisp
+(package! org-plot :recipe (:local-repo "lisp" :no-byte-compile t))
+#+end_src
+**** Org Bullets
+This gives some better heading bullets when in Emacs.
+#+begin_src emacs-lisp
+(package! org-bullets)
+#+end_src
+**** Graphviz dot
+Creating a ~dot~ src block can create diagrams of data.
+#+begin_src emacs-lisp
+(package! graphviz-dot-mode :pin "3642a0a5f41a80c8ecef7c6143d514200b80e194")
+#+end_src
+**** Org Super Agenda
+This gives some additional Org-mode features.
+#+begin_src emacs-lisp
+(package! org-super-agenda :pin "614371890c2b74e46b9652b2399c3aebb384d351")
+#+end_src
+**** Org Declarative Org Capture Templates
+Gives declarative syntax for Org Capture templates
+#+begin_src emacs-lisp
+(package! doct :pin "dabb30ebea866ef225b81561c8265d740b1e81c3")
+#+end_src
+**** Visuals
+***** Pretty Table
+Replaces the default org-mode tables with box-drawing characters
+#+begin_src emacs-lisp
+(package! org-pretty-table-mode :recipe (:host github :repo "Fuco1/org-pretty-table") :pin "474ad84a8fe5377d67ab7e491e8e68dac6e37a11")
+#+end_src
+*** Fun
+#+begin_src emacs-lisp
+(package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
+#+end_src
+* Package Configuration
+** Company
+Let's always get some completions suggested to us.
+#+begin_src emacs-lisp
+(after! company
+  (setq company-idle-delay 0.5
+        company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+  (add-hook 'evil-normal-state-entry-hook #'company-abort))
+#+end_src
+And let's keep a longer memory of what I've typed.
+#+begin_src emacs-lisp
+(setq-default history-length 1000)
+(setq-default prescient-history-length 1000)
+#+end_src
+
+*** Plain Text
+~ispell~ should work in plain text modes.
+#+begin_src emacs-lisp
+(set-company-backend!
+  '(text-mode
+    markdown-mode
+    gfm-mode)
+  '(:seperate
+    company-ispell
+    company-files
+    company-yasnippet))
+#+end_src
+** Ispell
+*** Downloading dictionary
+I got a dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary]] with the following options
+| Size       | Spelling(s) | Diacritic Handling | Special Lists  | Format |
+|------------+-------------+--------------------+----------------+--------|
+| 70 (large) | American    | Keep               | Hacker & Roman | Aspell |
+**** Installing Dictionary
+#+begin_src shell :tangle no
+cd /tmp
+curl -o "aspell6-en-custom.tar.bz2" "http://app.aspell.net/create?max_size=70&spelling=US&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell"
+tar -xjf "aspell6-en-custom.tar.bz2"
+
+cd aspell6-en-custom
+./configure && make && sudo make install
+#+end_src
+*** Configuration
+#+begin_src emacs-lisp
+(setq ispell-local-dictionary (expand-file-name  ".ispell_personal" doom-private-dir))
+(setq ispell-dictionary "en-custom")
+#+end_src
+** Tramp
+Use a better TRAMP mode form when I'm remotely editing things.
+#+begin_src emacs-lisp
+(setq tramp-default-method "ssh")
+#+end_src
+** Which-key
+I want suggestions faster
+#+begin_src emacs-lisp
+(setq which-key-idle-delay 0.5)
+#+end_src
+** xkcd
+Set up better commands
+#+begin_src emacs-lisp
+(use-package! xkcd
+  :commands (xkcd-get-json
+             xkcd-download xkcd-get)
+  :config
+  (after! evil-snipe
+    (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode)))
+#+end_src
+* Language Configuration
+** General
+*** File Templates
+I want /a lot/ to be at the top of ~org~ files and I want to do /little/ typing.
+#+begin_src emacs-lisp
+(set-file-template! "\\.org$" :trigger "__" :mode 'org-mode)
+#+end_src
+These are defined as a snippet.
+** Org Mode
+:PROPERTIES:
+:CUSTOM_ID: org
+:END:
+I'm in love with org mode.
+The learning curve was steep at first, but the versatility is so much better.
+[[https://tecosaur.com/][tecosaur]] outlined why it's so good great here
+
+#+plot: transpose:yes type:radar min:0 max:5 file:"misc/document-format-comparison.png"
+| Format   | Control | Initial Effort | Simplicity | Editor Support | Integrations | Versatility |
+|----------+---------+----------------+------------+----------------+--------------+-------------|
+| Word     |       2 |              4 |          4 |              2 |            3 |           2 |
+| LaTeX    |       4 |              1 |          1 |              3 |            2 |           4 |
+| Org Mode |       4 |              2 |        3.5 |              1 |            4 |           4 |
+| Markdown |       1 |              3 |          3 |              4 |            3 |           1 |
+
+#+attr_html: :class invertible :alt Radar chart comparing document formats
+[[file:misc/document-format-comparison.png]]
+*** Tweaking Defaults
+#+begin_src emacs-lisp
+(setq org-directory "~/org/"
+      org-use-property-inheritance t
+      org-catch-invisible-edits 'smart)
+#+end_src
+
+Set the ~:comments~ header-argument to be default
+#+begin_src emacs-lisp
+(setq org-babel-default-header-args
+      '((:session . "none")
+        (:results . "replace")
+        (:exports . "code")
+        (:cache . "no")
+        (:noweb . "no")
+        (:hlines . "no")
+        (:tangle . "no")
+        (:comments . "link")))
+#+end_src
+
+There is a weird bug with newlines and ~electric-indent~, so we have to disable that for now.
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
+#+end_src
+
+*** Adding new features
+**** View exported file
+=SPC m v= doesn't have a mapping, so let's open any exports of our file with it.
+#+begin_src emacs-lisp
+(after! org
+  (map! :map org-mode-map
+        :localleader
+        :desc "View exported file" "v" #'org-view-output-file)
+
+  (defun org-view-output-file (&optional org-file-path)
+    "Visit buffer open on the first output file (if any) found, using `org-view-output-file-extensions'"
+    (interactive)
+    (let* ((org-file-path (or org-file-path (buffer-file-name) ""))
+           (dir (file-name-directory org-file-path))
+           (basename (file-name-base org-file-path))
+           (output-file nil))
+      (dolist (ext org-view-output-file-extensions)
+        (unless output-file
+          (when (file-exists-p
+                 (concat dir basename "." ext))
+            (setq output-file (concat dir basename "." ext)))))
+      (if output-file
+          (if (member (file-name-extension output-file) org-view-external-file-extensions)
+              (org-open-file output-file)
+            (pop-to-buffer (or (find-buffer-visiting output-file)
+                               (find-file-noselect output-file))))
+        (message "No exported file found")))))
+
+(defvar org-view-output-file-extensions '("pdf" "md" "rst" "txt" "tex" "html")
+  "Search for output files with these extensions, in order, viewing the first that matches")
+(defvar org-view-external-file-extensions '("html")
+  "File formats that should be opened externally.")
+#+end_src
+**** Org Bullets
+#+begin_src emacs-lisp
+(after! org
+  ;; Getting org mode bullets
+  (require 'org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  ;; When emphasizing a word in org-mode, hide the surrounding characters
+  (setq org-hide-emphasis-markers t
+        org-export-allow-bind-keywords t))
+#+end_src
+*** Visuals
+**** Org Plot
+Have =org-plot= use current doom theme colors.
+#+begin_src emacs-lisp
+(after! org-plot
+  (defun org-plot/generate-theme (_type)
+    "Use the current Doom theme colours to generate a GnuPlot preamble."
+    (format "
+fgt = \"textcolor rgb '%s'\" # foreground text
+fgat = \"textcolor rgb '%s'\" # foreground alt text
+fgl = \"linecolor rgb '%s'\" # foreground line
+fgal = \"linecolor rgb '%s'\" # foreground alt line
+
+# foreground colors
+set border lc rgb '%s'
+# change text colors of  tics
+set xtics @fgt
+set ytics @fgt
+# change text colors of labels
+set title @fgt
+set xlabel @fgt
+set ylabel @fgt
+# change a text color of key
+set key @fgt
+
+# line styles
+set linetype 1 lw 2 lc rgb '%s' # red
+set linetype 2 lw 2 lc rgb '%s' # blue
+set linetype 3 lw 2 lc rgb '%s' # green
+set linetype 4 lw 2 lc rgb '%s' # magenta
+set linetype 5 lw 2 lc rgb '%s' # orange
+set linetype 6 lw 2 lc rgb '%s' # yellow
+set linetype 7 lw 2 lc rgb '%s' # teal
+set linetype 8 lw 2 lc rgb '%s' # violet
+
+# palette
+set palette maxcolors 8
+set palette defined ( 0 '%s',\
+1 '%s',\
+2 '%s',\
+3 '%s',\
+4 '%s',\
+5 '%s',\
+6 '%s',\
+7 '%s' )
+"
+            (doom-color 'fg)
+            (doom-color 'fg-alt)
+
+            (doom-color 'fg)
+            (doom-color 'fg-alt)
+            (doom-color 'fg)
+            ;; colours
+            (doom-color 'red)
+            (doom-color 'blue)
+            (doom-color 'green)
+            (doom-color 'magenta)
+            (doom-color 'orange)
+            (doom-color 'yellow)
+            (doom-color 'teal)
+            (doom-color 'violet)
+            ;; duplicated
+            (doom-color 'red)
+            (doom-color 'blue)
+            (doom-color 'green)
+            (doom-color 'magenta)
+            (doom-color 'orange)
+            (doom-color 'yellow)
+            (doom-color 'teal)
+            (doom-color 'violet)
+            ))
+  (defun org-plot/gnuplot-term-properties (_type)
+    (format "background rgb '%s' size 1050,650"
+            (doom-color 'bg)))
+  (setq org-plot/gnuplot-script-preamble #'org-plot/generate-theme)
+  (setq org-plot/gnuplot-term-extra #'org-plot/gnuplot-term-properties))
+#+end_src
+*** Exporting (General)
+Nest deeper in the table of contents and headings.
+#+begin_src emacs-lisp
+(after! org
+  (setq org-export-headline-levels 5))
+#+end_src
+If we want to tag a heading to not be exported, but keep the content.
+#+begin_src emacs-lisp
+(after! org
+  (require 'ox-extra)
+  (ox-extras-activate '(ignore-headlines)))
+#+end_src
+*** Exporting to HTML
+This is a hugely expensive operation, but looks really good.
+So we define a new mode, ~org-fancy-html-export-mode~ that can be disabled for faster exporting.
+#+begin_src emacs-lisp
+(define-minor-mode org-fancy-html-export-mode
+  "Toggle my fabulous org export tweaks. While this mode itself does a little bit,
+the vast majority of the change in behaviour comes from switch statements in:
+ - `org-html-template-fancier'
+ - `org-html--build-meta-info-extended'
+ - `org-html-src-block-collapsable'
+ - `org-html-block-collapsable'
+ - `org-html-table-wrapped'
+ - `org-html--format-toc-headline-colapseable'
+ - `org-html--toc-text-stripped-leaves'
+ - `org-export-html-headline-anchor'"
+  :global t
+  :init-value t
+  (if org-fancy-html-export-mode
+      (setq org-html-style-default org-html-style-fancy
+            org-html-meta-tags org-html-meta-tags-fancy
+            org-html-checkbox-type 'html-span)
+    (setq org-html-style-default org-html-style-plain
+          org-html-meta-tags org-html-meta-tags-plain
+          org-html-checkbox-type 'html)))
+#+end_src
+**** Extra header content
+#+begin_src emacs-lisp
+(defadvice! org-html-template-fancier (orig-fn contents info)
+  "Return complete document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options. Adds a few extra things to the body
+compared to the default implementation."
+  :around #'org-html-template
+  (if (not org-fancy-html-export-mode)
+      (funcall orig-fn contents info)
+    (concat
+     (when (and (not (org-html-html5-p info)) (org-html-xhtml-p info))
+       (let* ((xml-declaration (plist-get info :html-xml-declaration))
+              (decl (or (and (stringp xml-declaration) xml-declaration)
+                        (cdr (assoc (plist-get info :html-extension)
+                                    xml-declaration))
+                        (cdr (assoc "html" xml-declaration))
+                        "")))
+         (when (not (or (not decl) (string= "" decl)))
+           (format "%s\n"
+                   (format decl
+                           (or (and org-html-coding-system
+                                    (fboundp 'coding-system-get)
+                                    (coding-system-get org-html-coding-system 'mime-charset))
+                               "iso-8859-1"))))))
+     (org-html-doctype info)
+     "\n"
+     (concat "<html"
+             (cond ((org-html-xhtml-p info)
+                    (format
+                     " xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\""
+                     (plist-get info :language) (plist-get info :language)))
+                   ((org-html-html5-p info)
+                    (format " lang=\"%s\"" (plist-get info :language))))
+             ">\n")
+     "<head>\n"
+     (org-html--build-meta-info info)
+     (org-html--build-head info)
+     (org-html--build-mathjax-config info)
+     "</head>\n"
+     "<body>\n<input type='checkbox' id='theme-switch'><div id='page'><label id='switch-label' for='theme-switch'></label>"
+     (let ((link-up (org-trim (plist-get info :html-link-up)))
+           (link-home (org-trim (plist-get info :html-link-home))))
+       (unless (and (string= link-up "") (string= link-home ""))
+         (format (plist-get info :html-home/up-format)
+                 (or link-up link-home)
+                 (or link-home link-up))))
+     ;; Preamble.
+     (org-html--build-pre/postamble 'preamble info)
+     ;; Document contents.
+     (let ((div (assq 'content (plist-get info :html-divs))))
+       (format "<%s id=\"%s\">\n" (nth 1 div) (nth 2 div)))
+     ;; Document title.
+     (when (plist-get info :with-title)
+       (let ((title (and (plist-get info :with-title)
+                         (plist-get info :title)))
+             (subtitle (plist-get info :subtitle))
+             (html5-fancy (org-html--html5-fancy-p info)))
+         (when title
+           (format
+            "<div class='page-header'><div class='page-meta'>%s, %s</div><h1 class=\"title\">%s%s</h1></div>\n"
+            (org-export-data (plist-get info :date) info)
+            (org-export-data (plist-get info :author) info)
+            (org-export-data title info)
+            (if subtitle
+                (format
+                 (if html5-fancy
+                     "<br/><span class=\"subtitle\">%s</span>\n"
+                   (concat "\n" (org-html-close-tag "br" nil info) "\n"
+                           "<span class=\"subtitle\">%s</span>\n"))
+                 (org-export-data subtitle info))
+              "")))))
+     contents
+     (format "</%s>\n" (nth 1 (assq 'content (plist-get info :html-divs))))
+     ;; Postamble.
+     (org-html--build-pre/postamble 'postamble info)
+     ;; Possibly use the Klipse library live code blocks.
+     (when (plist-get info :html-klipsify-src)
+       (concat "<script>" (plist-get info :html-klipse-selection-script)
+               "</script><script src=\""
+               org-html-klipse-js
+               "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
+               org-html-klipse-css "\"/>"))
+     ;; Closing document.
+     "</div>\n</body>\n</html>")))
+#+end_src
+
+Let's add a table of contents link to the top of the page
+#+begin_src emacs-lisp
+(defadvice! org-html-toc-linked (depth info &optional scope)
+  "Build a table of contents.
+
+Just like `org-html-toc', except the header is a link to \"#\".
+
+DEPTH is an integer specifying the depth of the table.  INFO is
+a plist used as a communication channel.  Optional argument SCOPE
+is an element defining the scope of the table.  Return the table
+of contents as a string, or nil if it is empty."
+  :override #'org-html-toc
+  (let ((toc-entries
+         (mapcar (lambda (headline)
+                   (cons (org-html--format-toc-headline headline info)
+                         (org-export-get-relative-level headline info)))
+                 (org-export-collect-headlines info depth scope))))
+    (when toc-entries
+      (let ((toc (concat "<div id=\"text-table-of-contents\">"
+                         (org-html--toc-text toc-entries)
+                         "</div>\n")))
+        (if scope toc
+          (let ((outer-tag (if (org-html--html5-fancy-p info)
+                               "nav"
+                             "div")))
+            (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
+                    (let ((top-level (plist-get info :html-toplevel-hlevel)))
+                      (format "<h%d><a href=\"#\" style=\"color:inherit; text-decoration: none;\">%s</a></h%d>\n"
+                              top-level
+                              (org-html--translate "Table of Contents" info)
+                              top-level))
+                    toc
+                    (format "</%s>\n" outer-tag))))))))
+#+end_src
+
+Let's add some metadata
+#+begin_src emacs-lisp
+(after! ox-html
+  (defun org-html-meta-tags-fancy (title author info)
+    "Use the TITLE, AUTHOR, and INFO plist to generate info used to construct
+the meta tags, as described in `org-html-meta-tags'."
+    (list
+     (when (org-string-nw-p author)
+       (list "name" "author" author))
+     (when (org-string-nw-p (plist-get info :description))
+       (list "name" "description"
+             (plist-get info :description)))
+     '("name" "generator" "org mode")
+     '("name" "theme-color" "#77aa99")
+     '("property" "og:type" "article")
+     (list "property" "og:title" title)
+     (let ((subtitle (org-export-data (plist-get info :subtitle) info)))
+       (when (org-string-nw-p subtitle)
+         (list "property" "og:description" subtitle)))
+     '("property" "og:image" "https://tecosaur.com/resources/org/nib.png")
+     '("property" "og:image:type" "image/png")
+     '("property" "og:image:width" "200")
+     '("property" "og:image:height" "200")
+     '("property" "og:image:alt" "Green fountain pen nib")
+     (when (org-string-nw-p author)
+       (list "property" "og:article:author:first_name" (car (s-split-up-to " " author 2))))
+     (when (and (org-string-nw-p author) (s-contains-p " " author))
+       (list "property" "og:article:author:last_name" (cadr (s-split-up-to " " author 2))))
+     (list "property" "og:article:published_time" (format-time-string "%FT%T%z"))))
+
+  (setq org-html-meta-tags-plain (bound-and-true-p org-html-meta-tags)
+        org-html-meta-tags #'org-html-meta-tags-fancy))
+#+end_src
+**** Custom CSS/JS
+We define some template files that we read into exported files.
+#+begin_src emacs-lisp
+(after! org
+  (setq org-html-style-fancy
+        (concat (f-read-text (expand-file-name "misc/org-export-header.html" doom-private-dir))
+                "<script>\n"
+                (f-read-text (expand-file-name "misc/main.js" doom-private-dir))
+                "</script>\n<style>\n"
+                (f-read-text (expand-file-name "misc/main.css" doom-private-dir))
+                "</style>")
+        org-html-style-plain org-html-style-default
+        org-html-style-default  org-html-style-fancy
+        org-html-htmlize-output-type 'css
+        org-html-doctype "html5"
+        org-html-html5-fancy t))
+#+end_src
+**** Collapsible src and example blocks
+#+begin_src emacs-lisp
+(defadvice! org-html-src-block-collapsable (orig-fn src-block contents info)
+  "Wrap the usual <pre> block in a <details>"
+  :around #'org-html-src-block
+  (if (not org-fancy-html-export-mode)
+      (funcall orig-fn src-block contents info)
+    (let* ((properties (cadr src-block))
+           (lang (mode-name-to-lang-name
+                  (plist-get properties :language)))
+           (name (plist-get properties :name))
+           (ref (org-export-get-reference src-block info)))
+      (format
+       "<details id='%s' class='code'%s><summary%s>%s</summary>
+<div class='gutter'>
+<a href='#%s'>#</a>
+<button title='Copy to clipboard' onclick='copyPreToClipdord(this)'>⎘</button>\
+</div>
+%s
+</details>"
+       ref
+       (if (member (org-export-read-attribute :attr_html src-block :collapsed)
+                   '("y" "yes" "t" "true"))
+           "" " open")
+       (if name " class='named'" "")
+       (if (not name) (concat "<span class='lang'>" lang "</span>")
+         (format "<span class='name'>%s</span><span class='lang'>%s</span>" name lang))
+       ref
+       (if name
+           (replace-regexp-in-string (format "<pre\\( class=\"[^\"]+\"\\)? id=\"%s\">" ref) "<pre\\1>"
+                                     (funcall orig-fn src-block contents info))
+         (funcall orig-fn src-block contents info))))))
+
+(defun mode-name-to-lang-name (mode)
+  (or (cadr (assoc mode
+                   '(("asymptote" "Asymptote")
+                     ("awk" "Awk")
+                     ("C" "C")
+                     ("clojure" "Clojure")
+                     ("css" "CSS")
+                     ("D" "D")
+                     ("ditaa" "ditaa")
+                     ("dot" "Graphviz")
+                     ("calc" "Emacs Calc")
+                     ("emacs-lisp" "Emacs Lisp")
+                     ("fortran" "Fortran")
+                     ("gnuplot" "gnuplot")
+                     ("haskell" "Haskell")
+                     ("hledger" "hledger")
+                     ("java" "Java")
+                     ("js" "Javascript")
+                     ("latex" "LaTeX")
+                     ("ledger" "Ledger")
+                     ("lisp" "Lisp")
+                     ("lilypond" "Lilypond")
+                     ("lua" "Lua")
+                     ("matlab" "MATLAB")
+                     ("mscgen" "Mscgen")
+                     ("ocaml" "Objective Caml")
+                     ("octave" "Octave")
+                     ("org" "Org mode")
+                     ("oz" "OZ")
+                     ("plantuml" "Plantuml")
+                     ("processing" "Processing.js")
+                     ("python" "Python")
+                     ("R" "R")
+                     ("ruby" "Ruby")
+                     ("sass" "Sass")
+                     ("scheme" "Scheme")
+                     ("screen" "Gnu Screen")
+                     ("sed" "Sed")
+                     ("sh" "shell")
+                     ("sql" "SQL")
+                     ("sqlite" "SQLite")
+                     ("forth" "Forth")
+                     ("io" "IO")
+                     ("J" "J")
+                     ("makefile" "Makefile")
+                     ("maxima" "Maxima")
+                     ("perl" "Perl")
+                     ("picolisp" "Pico Lisp")
+                     ("scala" "Scala")
+                     ("shell" "Shell Script")
+                     ("ebnf2ps" "ebfn2ps")
+                     ("cpp" "C++")
+                     ("abc" "ABC")
+                     ("coq" "Coq")
+                     ("groovy" "Groovy")
+                     ("bash" "bash")
+                     ("csh" "csh")
+                     ("ash" "ash")
+                     ("dash" "dash")
+                     ("ksh" "ksh")
+                     ("mksh" "mksh")
+                     ("posh" "posh")
+                     ("ada" "Ada")
+                     ("asm" "Assembler")
+                     ("caml" "Caml")
+                     ("delphi" "Delphi")
+                     ("html" "HTML")
+                     ("idl" "IDL")
+                     ("mercury" "Mercury")
+                     ("metapost" "MetaPost")
+                     ("modula-2" "Modula-2")
+                     ("pascal" "Pascal")
+                     ("ps" "PostScript")
+                     ("prolog" "Prolog")
+                     ("simula" "Simula")
+                     ("tcl" "tcl")
+                     ("tex" "LaTeX")
+                     ("plain-tex" "TeX")
+                     ("verilog" "Verilog")
+                     ("vhdl" "VHDL")
+                     ("xml" "XML")
+                     ("nxml" "XML")
+                     ("conf" "Configuration File"))))
+      mode))
+#+end_src
+
+#+name: Example, fixed width, and property blocks
+#+begin_src emacs-lisp
+(after! org
+  (defun org-html-block-collapsable (orig-fn block contents info)
+    "Wrap the usual block in a <details>"
+    (if (not org-fancy-html-export-mode)
+        (funcall orig-fn block contents info)
+      (let ((ref (org-export-get-reference block info))
+            (type (pcase (car block)
+                    ('property-drawer "Properties")))
+            (collapsed-default (pcase (car block)
+                                 ('property-drawer t)
+                                 (_ nil)))
+            (collapsed-value (org-export-read-attribute :attr_html block :collapsed)))
+        (format
+         "<details id='%s' class='code'%s>
+<summary%s>%s</summary>
+<div class='gutter'>\
+<a href='#%s'>#</a>
+<button title='Copy to clipboard' onclick='copyPreToClipdord(this)'>⎘</button>\
+</div>
+%s\n
+</details>"
+         ref
+         (if (or (and collapsed-value (member collapsed-value '("y" "yes" "t" "true")))
+                 collapsed-default)
+             "" " open")
+         (if type " class='named'" "")
+         (if type (format "<span class='type'>%s</span>" type) "")
+         ref
+         (funcall orig-fn block contents info)))))
+
+  (advice-add 'org-html-example-block   :around #'org-html-block-collapsable)
+  (advice-add 'org-html-fixed-width     :around #'org-html-block-collapsable)
+  (advice-add 'org-html-property-drawer :around #'org-html-block-collapsable))
+#+end_src
+**** Include extra font-locking in htmlize
+#+begin_src emacs-lisp
+(add-hook 'htmlize-before-hook #'highlight-numbers--turn-on)
+#+end_src
+**** Handle table overflow
+#+begin_src emacs-lisp
+(defadvice! org-html-table-wrapped (orig-fn table contents info)
+  "Wrap the usual <table> in a <div>"
+  :around #'org-html-table
+  (if (not org-fancy-html-export-mode)
+      (funcall orig-fn table contents info)
+    (let* ((name (plist-get (cadr table) :name))
+           (ref (org-export-get-reference table info)))
+      (format "<div id='%s' class='table'>
+<div class='gutter'><a href='#%s'>#</a></div>
+<div class='tabular'>
+%s
+</div>\
+</div>"
+              ref ref
+              (if name
+                  (replace-regexp-in-string (format "<table id=\"%s\"" ref) "<table"
+                                            (funcall orig-fn table contents info))
+                (funcall orig-fn table contents info))))))
+#+end_src
+**** TOC as collapsible tree
+#+begin_src emacs-lisp
+(defadvice! org-html--format-toc-headline-colapseable (orig-fn headline info)
+  "Add a label and checkbox to `org-html--format-toc-headline's usual output,
+to allow the TOC to be a collapseable tree."
+  :around #'org-html--format-toc-headline
+  (if (not org-fancy-html-export-mode)
+      (funcall orig-fn headline info)
+    (let ((id (or (org-element-property :CUSTOM_ID headline)
+                  (org-export-get-reference headline info))))
+      (format "<input type='checkbox' id='toc--%s'/><label for='toc--%s'>%s</label>"
+              id id (funcall orig-fn headline info)))))
+#+end_src
+Leaves shouldn't have a label on them
+#+begin_src emacs-lisp
+(defadvice! org-html--toc-text-stripped-leaves (orig-fn toc-entries)
+  "Remove label"
+  :around #'org-html--toc-text
+  (if (not org-fancy-html-export-mode)
+      (funcall orig-fn toc-entries)
+    (replace-regexp-in-string "<input [^>]+><label [^>]+>\\(.+?\\)</label></li>" "\\1</li>"
+                              (funcall orig-fn toc-entries))))
+#+end_src
+**** Make verbatim different to code
+#+begin_src emacs-lisp
+(setq org-html-text-markup-alist
+      '((bold . "<b>%s</b>")
+        (code . "<code>%s</code>")
+        (italic . "<i>%s</i>")
+        (strike-through . "<del>%s</del>")
+        (underline . "<span class=\"underline\">%s</span>")
+        (verbatim . "<kbd>%s</kbd>")))
+#+end_src
+**** Change Checkbox
+#+begin_src emacs-lisp
+(after! org
+  (appendq! org-html-checkbox-types
+            '((html-span
+               ((on . "<span class='checkbox'></span>")
+                (off . "<span class='checkbox'></span>")
+                (trans . "<span class='checkbox'></span>")))))
+  (setq org-html-checkbox-type 'html-span))
+#+end_src
+**** Header Anchors
+#+begin_src emacs-lisp
+(after! org
+  (defun org-export-html-headline-anchor (text backend info)
+    (when (and (org-export-derived-backend-p backend 'html)
+               org-fancy-html-export-mode)
+        (replace-regexp-in-string
+         "<h\\([0-9]\\) id=\"\\([a-z0-9-]+\\)\">\\(.*[^ ]\\)<\\/h[0-9]>" ; this is quite restrictive, but due to `org-reference-contraction' I can do this
+         "<h\\1 id=\"\\2\">\\3<a aria-hidden=\"true\" href=\"#\\2\">#</a> </h\\1>"
+         text)))
+  (add-to-list 'org-export-filter-headline-functions
+               'org-export-html-headline-anchor))
+#+end_src
+*** Agenda
+**** Super Agenda
+#+begin_src emacs-lisp
+(use-package! org-super-agenda
+  :commands (org-super-agenda-mode))
+(after! org-agenda
+  (org-super-agenda-mode))
+
+(setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-seperator nil
+      org-agenda-tags-column 100
+      org-agenda-compact-blocks t)
+(setq org-agenda-custom-commands
+      '(("o" "Overview"
+         ((agenda "" ((org-agenda-span 'day)
+                      (org-super-agenda-groups
+                       '((:name "Today"
+                          :time-grid t
+                          :date today
+                          :todo "TODAY"
+                          :scheduled today
+                          :order 1)))))
+          (alltodo "" ((org-agenda-overriding-header "")
+                       (org-super-agenda-groups
+                        '((:name "Next to do"
+                           :todo "NEXT"
+                           :order 1)
+                          (:name "Important"
+                           :tag "Important"
+                           :priority "A"
+                           :order 6)
+                          (:name "Due Today"
+                           :deadline today
+                           :order 2)
+                          (:name "Due Soon"
+                           :deadline future
+                           :order 8)
+                          (:name "Overdue"
+                           :deadline past
+                           :face error
+                           :order 7)
+                          (:name "Assignments"
+                           :tag "Assignment"
+                           :order 10)
+                          (:name "University"
+                           :tag "uni"
+                           :order 12)
+                          (:name "Work"
+                           :tag "work"
+                           :order 13)
+                          (:name "To read"
+                           :tag "Read"
+                           :order 14)
+                          (:name "Trivial"
+                           :priority<= "E"
+                           :tag ("Trivial" "Unimportant")
+                           :todo ("SOMEDAY" )
+                           :order 90)
+                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+#+end_src
+**** Capture
+Making more visually nice capture templates
+#+begin_src emacs-lisp :noweb no-export
+(use-package! doct
+  :commands (doct))
+(after! org-capture
+  <<prettify-capture>>
+  (setq +org-capture-uni-units (condition-case nil
+                                   (split-string (f-read-text "~/org/.uni-units") "\n")
+                                 (error nil)))
+
+  (defun +doct-icon-declaration-to-icon (declaration)
+    "Convert :icon declaration to icon"
+    (let ((name (pop declaration))
+          (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
+          (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
+          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
+
+  (defun +doct-iconify-capture-templates (groups)
+    "Add declaration's :icon to each template group in GROUPS."
+    (let ((templates (doct-flatten-lists-in groups)))
+      (setq doct-templates (mapcar (lambda (template)
+                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
+                                                 (spec (plist-get (plist-get props :doct) :icon)))
+                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
+                                                                      "\t"
+                                                                      (nth 1 template))))
+                                     template)
+                                   templates))))
+
+  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
+
+  (defun set-org-capture-templates ()
+    (setq org-capture-templates
+          (doct `(("Personal todo" :keys "t"
+                   :icon ("checklist" :set "octicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %?"
+                              "%i %a")
+                   )
+                  ("Personal note" :keys "n"
+                   :icon ("sticky-note-o" :set "faicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* %?"
+                              "%i %a")
+                   )
+                  ("University" :keys "u"
+                   :icon ("graduation-cap" :set "faicon" :color "purple")
+                   :file +org-capture-todo-file
+                   :headline "University"
+                   :unit-prompt ,(format "%%^{Unit|%s}" (string-join +org-capture-uni-units "|"))
+                   :prepend t
+                   :type entry
+                   :children (("Test" :keys "t"
+                               :icon ("timer" :set "material" :color "red")
+                               :template ("* TODO [#C] %{unit-prompt} %? :uni:tests:"
+                                          "SCHEDULED: %^{Test date:}T"
+                                          "%i %a"))
+                              ("Assignment" :keys "a"
+                               :icon ("library_books" :set "material" :color "orange")
+                               :template ("* TODO [#B] %{unit-prompt} %? :uni:assignments:"
+                                          "DEADLINE: %^{Due date:}T"
+                                          "%i %a"))
+                              ("Lecture" :keys "l"
+                               :icon ("keynote" :set "fileicon" :color "orange")
+                               :template ("* TODO [#C] %{unit-prompt} %? :uni:lecture:"
+                                          "%i %a"))
+                              ("Miscellaneous task" :keys "u"
+                               :icon ("list" :set "faicon" :color "yellow")
+                               :template ("* TODO [#D] %{unit-prompt} %? :uni:"
+                                          "%i %a"))))
+                  ("Email" :keys "e"
+                   :icon ("envelope" :set "faicon" :color "blue")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
+                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
+                              "about %^{topic}"
+                              "%U %i %a"))
+                  ("Interesting" :keys "i"
+                   :icon ("eye" :set "faicon" :color "lcyan")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Interesting"
+                   :type entry
+                   :template ("* [ ] %{desc}%? :%{i-type}:"
+                              "%i %a")
+                   :children (("Webpage" :keys "w"
+                               :icon ("globe" :set "faicon" :color "green")
+                               :desc "%(org-cliplink-capture) "
+                               :i-type "read:web"
+                               )
+                              ("Article" :keys "a"
+                               :icon ("file-text" :set "octicon" :color "yellow")
+                               :desc ""
+                               :i-type "read:reaserch"
+                               )
+                              ("Information" :keys "i"
+                               :icon ("info-circle" :set "faicon" :color "blue")
+                               :desc ""
+                               :i-type "read:info"
+                               )
+                              ("Idea" :keys "I"
+                               :icon ("bubble_chart" :set "material" :color "silver")
+                               :desc ""
+                               :i-type "idea"
+                               )))
+                  ("Tasks" :keys "k"
+                   :icon ("inbox" :set "octicon" :color "yellow")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Tasks"
+                   :type entry
+                   :template ("* TODO %? %^G%{extra}"
+                              "%i %a")
+                   :children (("General Task" :keys "k"
+                               :icon ("inbox" :set "octicon" :color "yellow")
+                               :extra ""
+                               )
+                              ("Task with deadline" :keys "d"
+                               :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
+                               :extra "\nDEADLINE: %^{Deadline:}t"
+                               )
+                              ("Scheduled Task" :keys "s"
+                               :icon ("calendar" :set "octicon" :color "orange")
+                               :extra "\nSCHEDULED: %^{Start time:}t"
+                               )
+                              ))
+                  ("Project" :keys "p"
+                   :icon ("repo" :set "octicon" :color "silver")
+                   :prepend t
+                   :type entry
+                   :headline "Inbox"
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :file ""
+                   :custom (:time-or-todo "")
+                   :children (("Project-local todo" :keys "t"
+                               :icon ("checklist" :set "octicon" :color "green")
+                               :time-or-todo "TODO"
+                               :file +org-capture-project-todo-file)
+                              ("Project-local note" :keys "n"
+                               :icon ("sticky-note" :set "faicon" :color "yellow")
+                               :time-or-todo "%U"
+                               :file +org-capture-project-notes-file)
+                              ("Project-local changelog" :keys "c"
+                               :icon ("list" :set "faicon" :color "blue")
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-project-changelog-file))
+                   )
+                  ("\tCentralised project templates"
+                   :keys "o"
+                   :type entry
+                   :prepend t
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :children (("Project todo"
+                               :keys "t"
+                               :prepend nil
+                               :time-or-todo "TODO"
+                               :heading "Tasks"
+                               :file +org-capture-central-project-todo-file)
+                              ("Project note"
+                               :keys "n"
+                               :time-or-todo "%U"
+                               :heading "Notes"
+                               :file +org-capture-central-project-notes-file)
+                              ("Project changelog"
+                               :keys "c"
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-central-project-changelog-file))
+                   )))))
+
+  (set-org-capture-templates)
+  (unless (display-graphic-p)
+    (add-hook 'server-after-make-frame-hook
+      (defun org-capture-reinitialise-hook ()
+        (when (display-graphic-p)
+          (set-org-capture-templates)
+          (remove-hook 'server-after-make-frame-hook
+                       #'org-capture-reinitialise-hook))))))
+#+end_src
+Setup the capture dialogue.
+#+name: prettify-capture
+#+begin_src emacs-lisp :tangle no
+(defun org-capture-select-template-prettier (&optional keys)
+  "Select a capture template, in a prettier way than default
+Lisp programs can force the template by setting KEYS to a string."
+  (let ((org-capture-templates
+         (or (org-contextualize-keys
+              (org-capture-upgrade-templates org-capture-templates)
+              org-capture-templates-contexts)
+             '(("t" "Task" entry (file+headline "" "Tasks")
+                "* TODO %?\n  %u\n  %a")))))
+    (if keys
+        (or (assoc keys org-capture-templates)
+            (error "No capture template referred to by \"%s\" keys" keys))
+      (org-mks org-capture-templates
+               "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
+               "Template key: "
+               `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
+(advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
+
+(defun org-mks-pretty (table title &optional prompt specials)
+  "Select a member of an alist with multiple keys. Prettified.
+
+TABLE is the alist which should contain entries where the car is a string.
+There should be two types of entries.
+
+1. prefix descriptions like (\"a\" \"Description\")
+   This indicates that `a' is a prefix key for multi-letter selection, and
+   that there are entries following with keys like \"ab\", \"ax\"…
+
+2. Select-able members must have more than two elements, with the first
+   being the string of keys that lead to selecting it, and the second a
+   short description string of the item.
+
+The command will then make a temporary buffer listing all entries
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
+When you press a prefix key, the commands (and maybe further prefixes)
+under this key will be shown and offered for selection.
+
+TITLE will be placed over the selection in the temporary buffer,
+PROMPT will be used when prompting for a key.  SPECIALS is an
+alist with (\"key\" \"description\") entries.  When one of these
+is selected, only the bare key is returned."
+  (save-window-excursion
+    (let ((inhibit-quit t)
+          (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+          (prompt (or prompt "Select: "))
+          case-fold-search
+          current)
+      (unwind-protect
+          (catch 'exit
+            (while t
+              (setq-local evil-normal-state-cursor (list nil))
+              (erase-buffer)
+              (insert title "\n\n")
+              (let ((des-keys nil)
+                    (allowed-keys '("\C-g"))
+                    (tab-alternatives '("\s" "\t" "\r"))
+                    (cursor-type nil))
+                ;; Populate allowed keys and descriptions keys
+                ;; available with CURRENT selector.
+                (let ((re (format "\\`%s\\(.\\)\\'"
+                                  (if current (regexp-quote current) "")))
+                      (prefix (if current (concat current " ") "")))
+                  (dolist (entry table)
+                    (pcase entry
+                      ;; Description.
+                      (`(,(and key (pred (string-match re))) ,desc)
+                       (let ((k (match-string 1 key)))
+                         (push k des-keys)
+                         ;; Keys ending in tab, space or RET are equivalent.
+                         (if (member k tab-alternatives)
+                             (push "\t" allowed-keys)
+                           (push k allowed-keys))
+                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
+                      ;; Usable entry.
+                      (`(,(and key (pred (string-match re))) ,desc . ,_)
+                       (let ((k (match-string 1 key)))
+                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
+                         (push k allowed-keys)))
+                      (_ nil))))
+                ;; Insert special entries, if any.
+                (when specials
+                  (insert "─────────────────────────\n")
+                  (pcase-dolist (`(,key ,description) specials)
+                    (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
+                    (push key allowed-keys)))
+                ;; Display UI and let user select an entry or
+                ;; a sub-level prefix.
+                (goto-char (point-min))
+                (unless (pos-visible-in-window-p (point-max))
+                  (org-fit-window-to-buffer))
+                (let ((pressed (org--mks-read-key allowed-keys prompt)))
+                  (setq current (concat current pressed))
+                  (cond
+                   ((equal pressed "\C-g") (user-error "Abort"))
+                   ;; Selection is a prefix: open a new menu.
+                   ((member pressed des-keys))
+                   ;; Selection matches an association: return it.
+                   ((let ((entry (assoc current table)))
+                      (and entry (throw 'exit entry))))
+                   ;; Selection matches a special entry: return the
+                   ;; selection prefix.
+                   ((assoc current specials) (throw 'exit current))
+                   (t (error "No entry available")))))))
+        (when buffer (kill-buffer buffer))))))
+(advice-add 'org-mks :override #'org-mks-pretty)
+#+end_src
+Get a smaller org-capture frame.
+#+begin_src emacs-lisp
+(setf (alist-get 'height +org-capture-frame-parameters) 15)
+;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
+(setq +org-capture-fn
+      (lambda ()
+        (interactive)
+        (set-window-parameter nil 'mode-line-format 'none)
+        (org-capture)))
+
+#+end_src
+** Graphviz
+#+begin_src emacs-lisp
+(use-package! grahpviz-dot-mode
+  :commands graphviz-dot-mode
+  :mode ("\\.dot\\'" "\\.gz\\'"))
+
+(use-package! company-graphviz-dot
+  :after graphviz-dot-mode)
+#+end_src
+** Rust
+Set up a rust server
+#+begin_src emacs-lisp
+(setq lsp-rust-server 'rust-analyzer)
+#+end_src
+** R
+Better comment line breaks
+#+begin_src emacs-lisp
+(setq-hook! 'ess-r-mode-hook comment-line-break-function nil)
+#+end_src
