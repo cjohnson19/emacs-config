@@ -261,6 +261,15 @@ There is a weird bug with newlines and ~electric-indent~, so we have to disable 
 (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
+And let's always enable pretty mode
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook #'+org-pretty-mode)
+#+end_src
+
+Let's enable the pretty tables globally
+#+begin_src emacs-lisp
+(setq global-org-pretty-table-mode t)
+#+end_src
 *** Adding new features
 **** View exported file
 =SPC m v= doesn't have a mapping, so let's open any exports of our file with it.
