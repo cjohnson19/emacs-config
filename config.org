@@ -59,12 +59,6 @@ I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has be
       doom-big-font (font-spec :family "Jetbrains Mono" :size 24)
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
-I also prefer to have italicized font in more places like code comments or keywords in languages.
-#+begin_src emacs-lisp
-(custom-set-faces!
-  '(font-lock-comment-face :slant italic)
-  '(font-lock-keyword-face :slant italic))
-#+end_src
 **** Theme
 ~doom-one~ is really nice, but I like the slight purple of ~doom-dracula~ particularly.
 #+begin_src emacs-lisp
