@@ -266,7 +266,7 @@ Let's enable the pretty tables globally
 
 The built in ellipsis isn't the best communicator for more content being under a heading.
 #+begin_src emacs-lisp
-(setq org-ellipsis "⤵")
+(setq org-ellipsis " ▼")
 #+end_src
 *** Adding new features
 **** View exported file
