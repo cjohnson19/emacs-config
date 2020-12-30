@@ -263,6 +263,11 @@ Let's enable the pretty tables globally
 #+begin_src emacs-lisp
 (setq global-org-pretty-table-mode t)
 #+end_src
+
+The built in ellipsis isn't the best communicator for more content being under a heading.
+#+begin_src emacs-lisp
+(setq org-ellipsis "⤵")
+#+end_src
 *** Adding new features
 **** View exported file
 =SPC m v= doesn't have a mapping, so let's open any exports of our file with it.
