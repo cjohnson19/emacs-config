@@ -141,10 +141,9 @@ Replaces the default org-mode tables with box-drawing characters
 Let's always get some completions suggested to us.
 #+begin_src emacs-lisp
 (after! company
-  (setq company-idle-delay 0.5
-        company-minimum-prefix-length 2)
+  (setq company-idle-delay 0.2
+        company-minimum-prefix-length 2))
   (setq company-show-numbers t)
-  (add-hook 'evil-normal-state-entry-hook #'company-abort))
 #+end_src
 And let's keep a longer memory of what I've typed.
 #+begin_src emacs-lisp
