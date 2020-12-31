@@ -70,10 +70,16 @@ Sometimes the theme will overwrite previous font italic preferences - let's prev
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 #+end_src
-I like to see the word count more often
+I like to see the word count more often.
+In addition, the logo for the major mode is nice to have at times.
+This also allows ~mu4e~ to display the number of unread emails I have currently in the modeline.
 #+begin_src emacs-lisp
-(setq doom-modeline-enable-word-count t)
-(setq doom-modeline-continuous-word-count-modes '(org-mode markdown-mode))
+(after! doom-modeline
+  (setq doom-modeline-enable-word-count t
+        doom-modeline-major-mode-icon t
+        doom-modeline-major-mode-color-icon t
+        doom-modeline-continuous-word-count-modes '(org-mode markdown-mode)
+        doom-modeline-mu4e t))
 #+end_src
 **** Splash Image
 I set up a little lambda svg to serve as the splash screen.
@@ -135,6 +141,11 @@ Replaces the default org-mode tables with box-drawing characters
 *** Fun
 #+begin_src emacs-lisp
 (package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
+#+end_src
+*** Mail
+This package allows ~mu4e~ to alert me and display the unread email count on the modeline.
+#+begin_src emacs-lisp
+(package! mu4e-alert)
 #+end_src
 * Package Configuration
 ** Company
@@ -203,6 +214,36 @@ Set up better commands
   (after! evil-snipe
     (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode)))
 #+end_src
+** Mail
+Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
+#+begin_src emacs-lisp
+(mu4e-alert-set-default-style 'notifier)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+(setq mu4e-alert-email-notification-types '(count))
+#+end_src
+* Applications
+** Mail
+Set up the mail directory and refresh the email's state every 5 minutes.
+#+begin_src emacs-lisp
+(setq +mu4e-mu4e-mail-path "~/Maildir/"
+      mu4e-update-interval 300)
+#+end_src
+
+Set up default email account folder locations and a temporary signature.
+Very likely, I will not be sending any emails from Emacs, but the integrations with org mode and email seem long term benefitial.
+#+BEGIN_SRC emacs-lisp
+;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
+(set-email-account! "uni"
+  '((mu4e-sent-folder       . "/Sent Mail")
+    (mu4e-drafts-folder     . "/Drafts")
+    (mu4e-trash-folder      . "/Trash")
+    (mu4e-refile-folder     . "/All Mail")
+    (smtpmail-smtp-user     . "joh13266@umn.edu")
+    (user-mail-address      . "joh13266@umn.edu")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\nChase Johnson"))
+  t)
+#+END_SRC
 * Language Configuration
 ** General
 *** File Templates
@@ -268,6 +309,7 @@ The built in ellipsis isn't the best communicator for more content being under a
 #+begin_src emacs-lisp
 (setq org-ellipsis " ▼")
 #+end_src
+
 *** Adding new features
 **** View exported file
 =SPC m v= doesn't have a mapping, so let's open any exports of our file with it.
