@@ -203,6 +203,26 @@ Set up better commands
   (after! evil-snipe
     (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode)))
 #+end_src
+* Applications
+** Mail
+Set up the mail directory.
+#+begin_src emacs-lisp
+(setq +mu4e-mu4e-mail-path "~/Maildir/")
+#+end_src
+
+#+BEGIN_SRC emacs-lisp
+;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
+(set-email-account! "uni"
+  '((mu4e-sent-folder       . "/Sent Mail")
+    (mu4e-drafts-folder     . "/Drafts")
+    (mu4e-trash-folder      . "/Trash")
+    (mu4e-refile-folder     . "/All Mail")
+    (smtpmail-smtp-user     . "joh13266@umn.edu")
+    (user-mail-address      . "joh13266@umn.edu")    ;; only needed for mu < 1.4
+    (mu4e-compose-signature . "---\nChase Johnson"))
+  t)
+#+END_SRC
+
 * Language Configuration
 ** General
 *** File Templates
