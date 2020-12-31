@@ -9,10 +9,10 @@ Doom's built-in package system is defined in `init.el`.
 
 ## Possible Additions
 
-- [ ] [`mu4e`](https://www.emacswiki.org/emacs/mu4e) for emails
+- [x] [`mu4e`](https://www.emacswiki.org/emacs/mu4e) for emails
   - [x] General setup
   - [x] Set an action to open a message in HTML
-  - [ ] Show unread email count in modeline
+  - [x] Show unread email count in modeline
 - [ ] Re-enable `format +onsave` with only specific formats enabled -- because enabling them makes exporting to html take too long and ruins `src` blocks with the formatting. 
 - [ ] Setting up an automatic daily planning system, with a generated daily planning snippet or interactive command.
 
