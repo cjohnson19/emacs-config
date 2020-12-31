@@ -70,7 +70,9 @@ Sometimes the theme will overwrite previous font italic preferences - let's prev
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 #+end_src
-I like to see the word count more often
+I like to see the word count more often.
+In addition, the logo for the major mode is nice to have at times.
+This also allows ~mu4e~ to display the number of unread emails I have currently in the modeline.
 #+begin_src emacs-lisp
 (after! doom-modeline
   (setq doom-modeline-enable-word-count t
@@ -213,6 +215,7 @@ Set up better commands
     (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode)))
 #+end_src
 ** Mail
+Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 #+begin_src emacs-lisp
 (mu4e-alert-set-default-style 'notifier)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
@@ -221,12 +224,14 @@ Set up better commands
 #+end_src
 * Applications
 ** Mail
-Set up the mail directory.
+Set up the mail directory and refresh the email's state every 5 minutes.
 #+begin_src emacs-lisp
 (setq +mu4e-mu4e-mail-path "~/Maildir/"
       mu4e-update-interval 300)
 #+end_src
 
+Set up default email account folder locations and a temporary signature.
+Very likely, I will not be sending any emails from Emacs, but the integrations with org mode and email seem long term benefitial.
 #+BEGIN_SRC emacs-lisp
 ;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
 (set-email-account! "uni"
