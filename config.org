@@ -243,7 +243,7 @@ Set up the mail directory and refresh the email's state every 5 minutes.
 #+end_src
 
 Set up default email account folder locations and a temporary signature.
-Very likely, I will not be sending any emails from Emacs, but the integrations with org mode and email seem long term benefitial.
+Very likely, I will not be sending any emails from Emacs, but the integrations with org mode and email seem long term beneficial.
 #+BEGIN_SRC emacs-lisp
 ;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
 (set-email-account! "uni"
