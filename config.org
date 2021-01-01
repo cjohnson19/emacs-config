@@ -49,6 +49,14 @@ That muddies up a pretty sensitive file, so add changes to a separate file and l
 (when (file-exists-p custom-file)
   (load custom-file))
 #+end_src
+*** Key bindings
+Swap the keybindings for ~Org Capture~ and ~Pop up scratch buffer~
+#+begin_src emacs-lisp
+(map! :leader
+      :desc "Org Capture"           "x" #'org-capture
+      :desc "Pop up scratch buffer" "X" #'doom/open-scratch-buffer
+      :desc "Org Agenda"            "a" #'org-agenda)
+#+end_src
 ** Doom Configuration
 *** Visuals
 **** Font
@@ -310,6 +318,11 @@ The built in ellipsis isn't the best communicator for more content being under a
 (setq org-ellipsis " ▼")
 #+end_src
 
+Enable ~org-habit~
+#+begin_src emacs-lisp
+(add-to-list 'org-modules 'org-habit)
+(add-to-list 'org-modules 'org-id)
+#+end_src
 *** Adding new features
 **** View exported file
 =SPC m v= doesn't have a mapping, so let's open any exports of our file with it.
@@ -799,6 +812,53 @@ Leaves shouldn't have a label on them
                'org-export-html-headline-anchor))
 #+end_src
 *** Agenda
+**** Basics
+Configuring the basics of agenda
+#+begin_src emacs-lisp
+(setq org-agenda-start-with-log-mode t
+      org-log-done 'time
+      org-log-into-drawer t)
+#+end_src
+
+The current todo keywords aren't the most useful.
+#+begin_src emacs-lisp
+(setq org-todo-keywords
+  '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+    (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE (a)" "WAIT(w@/!)" "|" "COMPLETED(c)" "CANC(k@)")))
+#+end_src
+
+Set up tags
+#+begin_src emacs-lisp
+(setq org-tag-alist
+  '((:startgroup)
+    ; Mutually exclusive tags
+    (:endgroup)
+    ("work" . ?w)
+    ("uni" . ?u)
+    ("email" . ?e)
+    ("note" . ?n)
+    ("errand" . ?E)))
+#+end_src
+
+Set up refile targets for archiving and similar.
+#+begin_src emacs-lisp
+(setq org-refile-targets
+  '(("archive.org" :maxlevel . 1)
+    ("todo.org" :maxlevel . 1)))
+(advice-add 'org-refile :after 'org-save-all-org-buffers)
+#+end_src
+
+Add keybindings for opening todo items.
+#+begin_src emacs-lisp
+(map! :leader
+      :desc "Open Todo file"
+      "- t"
+      #'(lambda () (interactive) (find-file "~/org/todo.org"))
+      :leader
+      :desc "Open Habit file"
+      "- h"
+      #'(lambda () (interactive) (find-file "~/org/habits.org")))
+#+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
 (use-package! org-super-agenda
@@ -806,8 +866,8 @@ Leaves shouldn't have a label on them
 (after! org-agenda
   (org-super-agenda-mode))
 
-(setq org-agenda-skip-scheduled-if-done t
-      org-agenda-skip-deadline-if-done t
+(setq org-agenda-skip-scheduled-if-done nil
+      org-agenda-skip-deadline-if-done nil
       org-agenda-include-deadlines t
       org-agenda-block-seperator nil
       org-agenda-tags-column 100
