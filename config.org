@@ -146,6 +146,10 @@ Replaces the default org-mode tables with box-drawing characters
 #+begin_src emacs-lisp
 (package! org-pretty-table-mode :recipe (:host github :repo "Fuco1/org-pretty-table") :pin "474ad84a8fe5377d67ab7e491e8e68dac6e37a11")
 #+end_src
+**** Org Journal
+#+begin_src emacs-lisp
+(package! org-journal)
+#+end_src
 *** Fun
 #+begin_src emacs-lisp
 (package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
@@ -1235,6 +1239,25 @@ Get a smaller org-capture frame.
         (set-window-parameter nil 'mode-line-format 'none)
         (org-capture)))
 
+#+end_src
+*** Journal
+Set up the journal
+#+begin_src emacs-lisp
+(use-package! org-journal
+  :ensure t
+  :defer t
+  :init
+  (setq org-journal-prefix-key "C-c j")
+  :config
+  (setq org-journal-dir "~/org/journal/"
+        org-journal-date-format "%A, %d, %B, %Y"))
+#+end_src
+It doesn't seem to like the prefix key so let's map it!
+#+begin_src emacs-lisp
+(map! :leader
+      :desc "New journal entry"
+      "- j"
+      #'org-journal-new-entry)
 #+end_src
 ** Graphviz
 #+begin_src emacs-lisp
