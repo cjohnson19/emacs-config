@@ -249,6 +249,8 @@ Very likely, I will not be sending any emails from Emacs, but the integrations w
 (set-email-account! "uni"
   '((mu4e-sent-folder       . "/Sent Mail")
     (mu4e-drafts-folder     . "/Drafts")
+    (mu4e-update-interval   . 120)
+    (mu4e-get-mail-command  . "mbsync -a")
     (mu4e-trash-folder      . "/Trash")
     (mu4e-refile-folder     . "/All Mail")
     (smtpmail-smtp-user     . "joh13266@umn.edu")
