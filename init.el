@@ -157,6 +157,7 @@
        (org
         +dragndrop
         +pandoc
+        +journal
         +gnuplot
         +present
         +pretty)       ; organize your plain life in plain text

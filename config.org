@@ -146,10 +146,6 @@ Replaces the default org-mode tables with box-drawing characters
 #+begin_src emacs-lisp
 (package! org-pretty-table-mode :recipe (:host github :repo "Fuco1/org-pretty-table") :pin "474ad84a8fe5377d67ab7e491e8e68dac6e37a11")
 #+end_src
-**** Org Journal
-#+begin_src emacs-lisp
-(package! org-journal)
-#+end_src
 *** Fun
 #+begin_src emacs-lisp
 (package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
