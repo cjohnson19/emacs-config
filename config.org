@@ -239,7 +239,7 @@ Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 Set up the mail directory and refresh the email's state every 5 minutes.
 #+begin_src emacs-lisp
 (setq +mu4e-mu4e-mail-path "~/Maildir/"
-      mu4e-update-interval 120
+      mu4e-update-interval (* 5 60)
       mu4e-get-mail-command "mbsync -a")
 #+end_src
 
@@ -257,6 +257,11 @@ Very likely, I will not be sending any emails from Emacs, but the integrations w
     (mu4e-compose-signature . "---\nChase Johnson"))
   t)
 #+END_SRC
+
+And run mu4e in the background
+#+begin_src emacs-lisp
+(mu4e t)
+#+end_src
 * Language Configuration
 ** General
 *** File Templates
@@ -840,6 +845,8 @@ Set up tags
     (:endgroup)
     ("work" . ?w)
     ("uni" . ?u)
+    ("lecture" . ?l)
+    ("assignment" . ?a)
     ("email" . ?e)
     ("note" . ?n)
     ("errand" . ?E)))
