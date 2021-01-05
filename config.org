@@ -1221,7 +1221,6 @@ Get a smaller org-capture frame.
 Set up the journal
 #+begin_src emacs-lisp
 (use-package! org-journal
-  :ensure t
   :defer t
   :init
   (setq org-journal-prefix-key "C-c j")
