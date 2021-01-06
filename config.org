@@ -9,23 +9,26 @@
 #+property:     header-args :tangle no :results silent
 
 #+begin_quote
-When you write a program, think of it primarily as a work of literature.
-You're trying to write something that human beings are going to read.
-Don't think of it primarily as something a computer is going to follow.
-The more effective you are at making your program readable, the more effective it's going to be: You'll understand it today, you'll understand it next week, and your successors who are going to maintain and modify it will understand it.
---- Donald Knuth
+When you write a program, think of it primarily as a work of literature. You're
+trying to write something that human beings are going to read. Don't think of it
+primarily as something a computer is going to follow. The more effective you are
+at making your program readable, the more effective it's going to be: You'll
+understand it today, you'll understand it next week, and your successors who are
+going to maintain and modify it will understand it. --- Donald Knuth
 #+end_quote
 
 * Intro
-Creating a fully customized Emacs experience is almost mandatory.
-So, this is my crack at both creating a custom configuration and remaining aware of what I've done later on.
+Creating a fully customized Emacs experience is almost mandatory. So, this is my
+crack at both creating a custom configuration and remaining aware of what I've
+done later on.
 * Basic Configurations
 Make this file run better with lexical binding
 #+begin_src emacs-lisp :comments no
 ;;; config.el -*- lexical-binding: t; -*-
 #+end_src
 ** Personal Information
-This gets inserted automatically when using things like ~org-mode~, ~GPG~, ~email~, and more.
+This gets inserted automatically when using things like ~org-mode~, ~GPG~, ~email~,
+and more.
 #+begin_src emacs-lisp
 (setq user-full-name "Chase Johnson"
       user-mail-address "joh13266@umn.edu")
@@ -43,7 +46,8 @@ Improving some... /interesting/... default variable choices.
 #+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
-That muddies up a pretty sensitive file, so add changes to a separate file and load those in instead.
+That muddies up a pretty sensitive file, so add changes to a separate file and
+load those in instead.
 #+begin_src emacs-lisp
 (setq-default custom-file (expand-file-name ".custom.el" doom-private-dir))
 (when (file-exists-p custom-file)
@@ -60,7 +64,8 @@ Swap the keybindings for ~Org Capture~ and ~Pop up scratch buffer~
 ** Doom Configuration
 *** Visuals
 **** Font
-I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has better ligature support.
+I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has better
+ligature support.
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 15)
       doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
@@ -68,19 +73,21 @@ I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has be
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
 **** Theme
-~doom-one~ is really nice, but I like the slight purple of ~doom-dracula~ particularly.
+~doom-one~ is really nice, but I like the slight purple of ~doom-dracula~
+particularly.
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-dracula)
 #+end_src
-Sometimes the theme will overwrite previous font italic preferences - let's prevent that.
+Sometimes the theme will overwrite previous font italic preferences - let's
+prevent that.
 #+begin_src emacs-lisp
 (after! doom-themes
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t))
 #+end_src
-I like to see the word count more often.
-In addition, the logo for the major mode is nice to have at times.
-This also allows ~mu4e~ to display the number of unread emails I have currently in the modeline.
+I like to see the word count more often. In addition, the logo for the major
+mode is nice to have at times. This also allows ~mu4e~ to display the number of
+unread emails I have currently in the modeline.
 #+begin_src emacs-lisp
 (after! doom-modeline
   (setq doom-modeline-enable-word-count t
@@ -111,12 +118,12 @@ This file shouldn't be byte compiled.
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle "packages.el"
 :END:
-This is where we install packages, by declaring them with ~package!~ macro, then running ~doom sync~.
-Afterwards, =M-x doom/reload= updates them.
+This is where we install packages, by declaring them with ~package!~ macro, then
+running ~doom sync~. Afterwards, =M-x doom/reload= updates them.
 *** Org Mode
 **** Org Plot
-Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create nice graphics.
-This is a modified version that adds in ~radar~ charts.
+Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create
+nice graphics. This is a modified version that adds in ~radar~ charts.
 #+begin_src emacs-lisp
 (package! org-plot :recipe (:local-repo "lisp" :no-byte-compile t))
 #+end_src
@@ -239,8 +246,9 @@ Set up the mail directory and refresh the email's state every 5 minutes.
       mu4e-get-mail-command "mbsync -a")
 #+end_src
 
-Set up default email account folder locations and a temporary signature.
-Very likely, I will not be sending any emails from Emacs, but the integrations with org mode and email seem long term beneficial.
+Set up default email account folder locations and a temporary signature. Very
+likely, I will not be sending any emails from Emacs, but the integrations with
+org mode and email seem long term beneficial.
 #+BEGIN_SRC emacs-lisp
 ;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
 (set-email-account! "uni"
@@ -270,9 +278,8 @@ These are defined as a snippet.
 :PROPERTIES:
 :CUSTOM_ID: org
 :END:
-I'm in love with org mode.
-The learning curve was steep at first, but the versatility is so much better.
-[[https://tecosaur.com/][tecosaur]] outlined why it's so good great here
+I'm in love with org mode. The learning curve was steep at first, but the
+versatility is so much better. [[https://tecosaur.com/][tecosaur]] outlined why it's so good great here
 
 #+plot: transpose:yes type:radar min:0 max:5 file:"misc/document-format-comparison.png"
 | Format   | Control | Initial Effort | Simplicity | Editor Support | Integrations | Versatility |
@@ -304,7 +311,8 @@ Set the ~:comments~ header-argument to be default
         (:comments . "link")))
 #+end_src
 
-There is a weird bug with newlines and ~electric-indent~, so we have to disable that for now.
+There is a weird bug with newlines and ~electric-indent~, so we have to disable
+that for now.
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
@@ -312,6 +320,11 @@ There is a weird bug with newlines and ~electric-indent~, so we have to disable 
 And let's always enable pretty mode
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook #'+org-pretty-mode)
+#+end_src
+
+I set it to where it will automatically add a new line when it gets too long.
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'auto-fill-mode)
 #+end_src
 
 Let's enable the pretty tables globally
@@ -385,8 +398,8 @@ If we want to tag a heading to not be exported, but keep the content.
   (ox-extras-activate '(ignore-headlines)))
 #+end_src
 *** Exporting to HTML
-This is a hugely expensive operation, but looks really good.
-So we define a new mode, ~org-fancy-html-export-mode~ that can be disabled for faster exporting.
+This is a hugely expensive operation, but looks really good. So we define a new
+mode, ~org-fancy-html-export-mode~ that can be disabled for faster exporting.
 #+begin_src emacs-lisp
 (define-minor-mode org-fancy-html-export-mode
   "Toggle my fabulous org export tweaks. While this mode itself does a little bit,
@@ -874,8 +887,8 @@ Add keybindings for opening todo items.
 (after! org-agenda
   (org-super-agenda-mode))
 
-(setq org-agenda-skip-scheduled-if-done nil
-      org-agenda-skip-deadline-if-done nil
+(setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
       org-agenda-block-seperator nil
       org-agenda-tags-column 100
@@ -926,7 +939,7 @@ Add keybindings for opening todo items.
                            :tag ("Trivial" "Unimportant")
                            :todo ("SOMEDAY" )
                            :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+                          (:discard (:tag ("Chore" "habits" "Routine" "Daily")))))))))))
 #+end_src
 **** Capture
 Making more visually nice capture templates
