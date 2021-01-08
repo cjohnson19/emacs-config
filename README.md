@@ -13,6 +13,10 @@ Doom's built-in package system is defined in `init.el`.
   - [x] General setup
   - [x] Set an action to open a message in HTML
   - [x] Show unread email count in modeline
-- [ ] Re-enable `format +onsave` with only specific formats enabled -- because enabling them makes exporting to html take too long and ruins `src` blocks with the formatting. 
-- [ ] Setting up an automatic daily planning system, with a generated daily planning snippet or interactive command.
-
+- [ ] Re-enable `format +onsave` with only specific formats enabled -- because
+      enabling them makes exporting to html take too long and ruins `src` blocks
+      with the formatting. 
+- [x] Setting up an automatic daily planning system, with a generated daily 
+      planning snippet or interactive command.
+- [ ] Generate a new `org-super-agenda` view that takes displays the habits for
+      other days if they are not a `Daily` tag.
