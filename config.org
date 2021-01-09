@@ -4,7 +4,7 @@
 #+EMAIL:        joh13266@umn.edu
 #+DATE:         {{{modification-time(%Y-%m-%d %H:%M, t)}}}; {{{timezone}}}
 #+macro:        timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
-#+startup:      fold
+#+startup:      overview
 #+property:     header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
 #+property:     header-args :tangle no :results silent
 
@@ -837,6 +837,7 @@ Configuring the basics of agenda
 (setq org-agenda-start-with-log-mode t
       org-log-done 'time
       org-log-into-drawer t
+      org-agenda-show-future-repeats 'next
       org-habit-show-habits-only-for-today nil)
 #+end_src
 
@@ -897,41 +898,42 @@ Add keybindings for opening todo items.
       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
       org-agenda-block-seperator nil
+      org-habit-show-habits-only-for-today nil
       org-agenda-tags-column 100
-      org-agenda-start-with-log-mode t
-      org-agenda-compact-blocks t)
+      org-agenda-start-with-log-mode t)
 (setq org-agenda-custom-commands
       '(("o" "Overview"
           ((agenda "" ((org-agenda-span 'day)
                        (org-super-agenda-groups
                         '((:name "Today"
                            :time-grid t
-                           :date today
-                           :todo "TODAY"
-                           :scheduled today
                            :order 1)))))
            (alltodo "" ((org-agenda-overriding-header "")
                         (org-super-agenda-groups
-                         '((:name "Next to do"
+                         '((:discard (:tag ("Daily" "Routine")))
+                           (:name "Next to do"
                             :todo "NEXT"
-                            :order 1)
+                            :order 2)
                            (:name "Due Today"
                             :deadline today
-                            :order 2)
+                            :order 3)
                            (:name "University"
                             :tag "uni"
-                            :order 3)
+                            :time-grid t
+                            :order 4)
                            (:name "Work"
                             :tag "work"
-                            :order 4)
+                            :time-grid t
+                            :order 5)
                            (:name "Personal"
                             :tag "Personal"
-                            :order 5)
-                           (:discard (:tag ("Daily" "Routine")))))))))
+                            :order 6)
+                           ))))))
         ("d" "Dates & Deadlines"
          ((alltodo "" ((org-agenda-overriding-header "")
                    (org-super-agenda-groups
-                    '((:name "Projects"
+                    '((:discard (:tag ("lecture" "Daily")))
+                      (:name "Projects"
                        :tag "project"
                        :order 1)
                       (:name "Tests"
@@ -940,7 +942,6 @@ Add keybindings for opening todo items.
                       (:name "Assignment"
                        :tag "assignment"
                        :order 3)
-                      (:discard (:tag "lecture"))
                       (:discard (:not (:tag ("uni"))))))))))))
 #+end_src
 **** Capture
