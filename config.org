@@ -855,8 +855,13 @@ Set up tags
     (:endgroup)
     ("work" . ?w)
     ("uni" . ?u)
+    ("personal" . ?p)
     ("lecture" . ?l)
     ("assignment" . ?a)
+    ("test" . ?t)
+    ("project" . ?P)
+    ("read" . ?r)
+    ("info" . ?i)
     ("email" . ?e)
     ("note" . ?n)
     ("errand" . ?E)))
@@ -893,54 +898,50 @@ Add keybindings for opening todo items.
       org-agenda-include-deadlines t
       org-agenda-block-seperator nil
       org-agenda-tags-column 100
+      org-agenda-start-with-log-mode t
       org-agenda-compact-blocks t)
 (setq org-agenda-custom-commands
       '(("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
-                      (org-super-agenda-groups
-                       '((:name "Today"
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
+          ((agenda "" ((org-agenda-span 'day)
                        (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
-                           :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
-                           :deadline past
-                           :face error
-                           :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
-                           :order 10)
-                          (:name "University"
-                           :tag "uni"
-                           :order 12)
-                          (:name "Work"
-                           :tag "work"
-                           :order 13)
-                          (:name "To read"
-                           :tag "Read"
-                           :order 14)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
-                           :order 90)
-                          (:discard (:tag ("Chore" "habits" "Routine" "Daily")))))))))))
+                        '((:name "Today"
+                           :time-grid t
+                           :date today
+                           :todo "TODAY"
+                           :scheduled today
+                           :order 1)))))
+           (alltodo "" ((org-agenda-overriding-header "")
+                        (org-super-agenda-groups
+                         '((:name "Next to do"
+                            :todo "NEXT"
+                            :order 1)
+                           (:name "Due Today"
+                            :deadline today
+                            :order 2)
+                           (:name "University"
+                            :tag "uni"
+                            :order 3)
+                           (:name "Work"
+                            :tag "work"
+                            :order 4)
+                           (:name "Personal"
+                            :tag "Personal"
+                            :order 5)
+                           (:discard (:tag ("Daily" "Routine")))))))))
+        ("d" "Dates & Deadlines"
+         ((alltodo "" ((org-agenda-overriding-header "")
+                   (org-super-agenda-groups
+                    '((:name "Projects"
+                       :tag "project"
+                       :order 1)
+                      (:name "Tests"
+                       :tag "test"
+                       :order 2)
+                      (:name "Assignment"
+                       :tag "assignment"
+                       :order 3)
+                      (:discard (:tag "lecture"))
+                      (:discard (:not (:tag ("uni"))))))))))))
 #+end_src
 **** Capture
 Making more visually nice capture templates
@@ -1004,12 +1005,12 @@ Making more visually nice capture templates
                    :type entry
                    :children (("Test" :keys "t"
                                :icon ("timer" :set "material" :color "red")
-                               :template ("* TODO [#C] %{unit-prompt} %? :uni:tests:"
+                               :template ("* TODO [#C] %{unit-prompt} %? :uni:test:"
                                           "SCHEDULED: %^{Test date:}T"
                                           "%i %a"))
                               ("Assignment" :keys "a"
                                :icon ("library_books" :set "material" :color "orange")
-                               :template ("* TODO [#B] %{unit-prompt} %? :uni:assignments:"
+                               :template ("* TODO [#B] %{unit-prompt} %? :uni:assignment:"
                                           "DEADLINE: %^{Due date:}T"
                                           "%i %a"))
                               ("Lecture" :keys "l"
@@ -1046,7 +1047,7 @@ Making more visually nice capture templates
                               ("Article" :keys "a"
                                :icon ("file-text" :set "octicon" :color "yellow")
                                :desc ""
-                               :i-type "read:reaserch"
+                               :i-type "read:research"
                                )
                               ("Information" :keys "i"
                                :icon ("info-circle" :set "faicon" :color "blue")
