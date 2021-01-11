@@ -44,6 +44,13 @@ Improving some... /interesting/... default variable choices.
 (setq evil-want-fine-undo t  ; Better undo
       auto-save-default t)   ; Don't lose my work
 #+end_src
+
+Adding hooks to automatically wrap the text when it reaches sufficient length
+when it's in a text based buffer.
+#+begin_src emacs-lisp
+(add-hook 'text-mode-hook 'auto-fill-mode)
+(add-hook 'markdown-mode-hook 'auto-fill-mode)
+#+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
 That muddies up a pretty sensitive file, so add changes to a separate file and

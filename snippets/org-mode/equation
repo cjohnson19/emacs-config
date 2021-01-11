@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: equation
+# uuid: eq
+# key: trigger-key
+# condition: t
+# --
+
+\\begin{equation\}
+$1
+\\end{equation\}
