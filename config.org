@@ -892,7 +892,11 @@ Add keybindings for opening todo items.
       :leader
       :desc "Open Habit file"
       "- h"
-      #'(lambda () (interactive) (find-file "~/org/habits.org")))
+      #'(lambda () (interactive) (find-file "~/org/habits.org"))
+      :leader
+      :desc "Open Class file"
+      "- c"
+      #'(lambda () (interactive) (find-file "~/org/class.org")))
 #+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
