@@ -5,6 +5,7 @@
 #+DATE:         {{{modification-time(%Y-%m-%d %H:%M, t)}}}; {{{timezone}}}
 #+macro:        timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
 #+startup:      overview
+#+startup:      hideblocks
 #+property:     header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
 #+property:     header-args :tangle no :results silent
 
@@ -248,7 +249,7 @@ Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 ** Mail
 Set up the mail directory and refresh the email's state every 5 minutes.
 #+begin_src emacs-lisp
-(setq +mu4e-mu4e-mail-path "~/Maildir/"
+(setq +mu4e-mu4e-mail-path "~/.mail/"
       mu4e-update-interval (* 5 60)
       mu4e-get-mail-command "mbsync -a")
 #+end_src
@@ -259,10 +260,10 @@ org mode and email seem long term beneficial.
 #+BEGIN_SRC emacs-lisp
 ;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
 (set-email-account! "uni"
-  '((mu4e-sent-folder       . "/Sent Mail")
-    (mu4e-drafts-folder     . "/Drafts")
-    (mu4e-trash-folder      . "/Trash")
-    (mu4e-refile-folder     . "/All Mail")
+  '((mu4e-sent-folder       . "/[Gmail]/Sent Mail")
+    (mu4e-drafts-folder     . "/[Gmail]/Drafts")
+    (mu4e-trash-folder      . "/[Gmail]/Trash")
+    (mu4e-refile-folder     . "/[Gmail]/All Mail")
     (smtpmail-smtp-user     . "joh13266@umn.edu")
     (user-mail-address      . "joh13266@umn.edu")    ;; only needed for mu < 1.4
     (mu4e-compose-signature . "---\nChase Johnson"))
@@ -844,7 +845,7 @@ Configuring the basics of agenda
 (setq org-agenda-start-with-log-mode t
       org-log-done 'time
       org-log-into-drawer t
-      org-agenda-show-future-repeats 'next
+      org-agenda-show-future-repeats nil
       org-habit-show-habits-only-for-today nil)
 #+end_src
 
@@ -899,10 +900,17 @@ Add keybindings for opening todo items.
       #'(lambda () (interactive) (find-file "~/org/class.org")))
 #+end_src
 
+Add keybinding for opening the calendar.
+#+begin_src emacs-lisp
+(map! :leader
+      :desc "Open Calendar"
+      "o c"
+      #'(lambda () (interactive) (cfw:open-org-calendar)))
+#+end_src
+
 Once we quit the agenda -- say after we have updated a task's status -- we
 should save all of the org buffers open so that their modification from the
 agenda is persisted.
-
 #+begin_src emacs-lisp
 (advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
 #+end_src
