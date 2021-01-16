@@ -898,6 +898,14 @@ Add keybindings for opening todo items.
       "- c"
       #'(lambda () (interactive) (find-file "~/org/class.org")))
 #+end_src
+
+Once we quit the agenda -- say after we have updated a task's status -- we
+should save all of the org buffers open so that their modification from the
+agenda is persisted.
+
+#+begin_src emacs-lisp
+(advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
+#+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
 (use-package! org-super-agenda
