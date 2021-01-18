@@ -49,8 +49,8 @@ Improving some... /interesting/... default variable choices.
 Adding hooks to automatically wrap the text when it reaches sufficient length
 when it's in a text based buffer.
 #+begin_src emacs-lisp
-(add-hook 'text-mode-hook 'auto-fill-mode)
-(add-hook 'markdown-mode-hook 'auto-fill-mode)
+(add-hook! 'text-mode-hook 'auto-fill-mode)
+(add-hook! 'markdown-mode-hook 'auto-fill-mode)
 #+end_src
 
 Let's use the built in emacs browser to follow links. This will let me stay in
@@ -82,7 +82,7 @@ I really like ~Jetbrains Mono~ for its clarity, but sometimes ~Fira Code~ has be
 ligature support.
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 15)
-      doom-variable-pitch-font (font-spec :family "Fira Code" :size 15)
+      doom-variable-pitch-font (font-spec :family "Helvetica" :size 15)
       doom-big-font (font-spec :family "Jetbrains Mono" :size 24)
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
@@ -247,8 +247,8 @@ Set up better commands
 Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 #+begin_src emacs-lisp
 (mu4e-alert-set-default-style 'notifier)
-(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
-(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+(add-hook! 'after-init-hook #'mu4e-alert-enable-notifications)
+(add-hook! 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
 #+end_src
 * Applications
@@ -333,17 +333,17 @@ Set up the org roam location.
 There is a weird bug with newlines and ~electric-indent~, so we have to disable
 that for now.
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
+(add-hook! 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
 And let's always enable pretty mode.
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'+org-pretty-mode)
+(add-hook! 'org-mode-hook #'+org-pretty-mode)
 #+end_src
 
 I set it to where it will automatically add a new line when it gets too long.
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'auto-fill-mode)
+(add-hook! 'org-mode-hook 'auto-fill-mode)
 #+end_src
 
 Let's enable the pretty tables globally
@@ -399,7 +399,7 @@ Enable ~org-habit~
 (after! org
   ;; Getting org mode bullets
   (require 'org-bullets)
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (add-hook! 'org-mode-hook (lambda () (org-bullets-mode 1)))
   ;; When emphasizing a word in org-mode, hide the surrounding characters
   (setq org-hide-emphasis-markers t
         org-export-allow-bind-keywords t))
@@ -770,7 +770,7 @@ We define some template files that we read into exported files.
 #+end_src
 **** Include extra font-locking in htmlize
 #+begin_src emacs-lisp
-(add-hook 'htmlize-before-hook #'highlight-numbers--turn-on)
+(add-hook! 'htmlize-before-hook #'highlight-numbers--turn-on)
 #+end_src
 **** Handle table overflow
 #+begin_src emacs-lisp
