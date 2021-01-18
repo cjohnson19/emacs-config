@@ -53,11 +53,6 @@ when it's in a text based buffer.
 (add-hook! 'markdown-mode-hook 'auto-fill-mode)
 #+end_src
 
-Let's use the built in emacs browser to follow links. This will let me stay in
-Emacs when viewing things like emails in html.
-#+begin_src emacs-lisp
-(setq browse-url-browser-function 'eww-browse-url)
-#+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
 That muddies up a pretty sensitive file, so add changes to a separate file and
@@ -253,6 +248,11 @@ Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 #+end_src
 * Applications
 ** Mail
+Tell emacs that I will be using [[https://www.emacswiki.org/emacs/mu4e][mu4e]].
+#+begin_src emacs-lisp
+(setq mail-user-agent 'mu4e-user-agent)
+#+end_src
+*** Receiving
 Set up the mail directory and refresh the email's state every 5 minutes.
 #+begin_src emacs-lisp
 (setq +mu4e-mu4e-mail-path "~/.mail/"
@@ -279,6 +279,29 @@ org mode and email seem long term beneficial.
 And run mu4e in the background
 #+begin_src emacs-lisp
 (mu4e t)
+#+end_src
+*** Sending
+I use [[https://marlam.de/msmtp/msmtp.html#Configuration-files][msmtp]] to send my emails through ~SMTP~.
+
+#+begin_src emacs-lisp
+(after! mu4e
+  (setq sendmail-program "/usr/local/bin/msmtp"
+        send-mail-function #'smtpmail-send-it
+        message-sendmail-f-is-evil t
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-send-mail-function #'message-send-mail-with-sendmail))
+#+end_src
+**** Org Msg
+Allows me to write an email in org mode and then it will be converted to html
+when sent.
+#+begin_src emacs-lisp
+(setq +org-msg-accent-color "#1a5fb4"
+      org-msg-greeting-fmt "\nHi %s,\n\n"
+      org-msg-default-alternatives '(html)
+      org-msg-signature "\n\n#+begin_signature\nBest,\\\\\nChase\n#+end_signature")
+(map! :map org-msg-edit-mode-map
+      :after org-msg
+      :n "G" #'org-msg-goto-body)
 #+end_src
 * Language Configuration
 ** General
@@ -449,7 +472,7 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options. Adds a few extra things to the body
 compared to the default implementation."
   :around #'org-html-template
-  (if (not org-fancy-html-export-mode)
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
       (funcall orig-fn contents info)
     (concat
      (when (and (not (org-html-html5-p info)) (org-html-xhtml-p info))
@@ -618,7 +641,7 @@ We define some template files that we read into exported files.
 (defadvice! org-html-src-block-collapsable (orig-fn src-block contents info)
   "Wrap the usual <pre> block in a <details>"
   :around #'org-html-src-block
-  (if (not org-fancy-html-export-mode)
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
       (funcall orig-fn src-block contents info)
     (let* ((properties (cadr src-block))
            (lang (mode-name-to-lang-name
@@ -737,7 +760,7 @@ We define some template files that we read into exported files.
 (after! org
   (defun org-html-block-collapsable (orig-fn block contents info)
     "Wrap the usual block in a <details>"
-    (if (not org-fancy-html-export-mode)
+    (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
         (funcall orig-fn block contents info)
       (let ((ref (org-export-get-reference block info))
             (type (pcase (car block)
@@ -777,7 +800,7 @@ We define some template files that we read into exported files.
 (defadvice! org-html-table-wrapped (orig-fn table contents info)
   "Wrap the usual <table> in a <div>"
   :around #'org-html-table
-  (if (not org-fancy-html-export-mode)
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
       (funcall orig-fn table contents info)
     (let* ((name (plist-get (cadr table) :name))
            (ref (org-export-get-reference table info)))
@@ -799,7 +822,7 @@ We define some template files that we read into exported files.
   "Add a label and checkbox to `org-html--format-toc-headline's usual output,
 to allow the TOC to be a collapseable tree."
   :around #'org-html--format-toc-headline
-  (if (not org-fancy-html-export-mode)
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
       (funcall orig-fn headline info)
     (let ((id (or (org-element-property :CUSTOM_ID headline)
                   (org-export-get-reference headline info))))
@@ -811,7 +834,7 @@ Leaves shouldn't have a label on them
 (defadvice! org-html--toc-text-stripped-leaves (orig-fn toc-entries)
   "Remove label"
   :around #'org-html--toc-text
-  (if (not org-fancy-html-export-mode)
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
       (funcall orig-fn toc-entries)
     (replace-regexp-in-string "<input [^>]+><label [^>]+>\\(.+?\\)</label></li>" "\\1</li>"
                               (funcall orig-fn toc-entries))))
@@ -842,10 +865,11 @@ Leaves shouldn't have a label on them
   (defun org-export-html-headline-anchor (text backend info)
     (when (and (org-export-derived-backend-p backend 'html)
                org-fancy-html-export-mode)
+      (unless (bound-and-true-p +org-msg-currently-exporting)
         (replace-regexp-in-string
          "<h\\([0-9]\\) id=\"\\([a-z0-9-]+\\)\">\\(.*[^ ]\\)<\\/h[0-9]>" ; this is quite restrictive, but due to `org-reference-contraction' I can do this
          "<h\\1 id=\"\\2\">\\3<a aria-hidden=\"true\" href=\"#\\2\">#</a> </h\\1>"
-         text)))
+         text))))
   (add-to-list 'org-export-filter-headline-functions
                'org-export-html-headline-anchor))
 #+end_src
