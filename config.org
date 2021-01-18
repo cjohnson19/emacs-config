@@ -52,6 +52,12 @@ when it's in a text based buffer.
 (add-hook 'text-mode-hook 'auto-fill-mode)
 (add-hook 'markdown-mode-hook 'auto-fill-mode)
 #+end_src
+
+Let's use the built in emacs browser to follow links. This will let me stay in
+Emacs when viewing things like emails in html.
+#+begin_src emacs-lisp
+(setq browse-url-browser-function 'eww-browse-url)
+#+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
 That muddies up a pretty sensitive file, so add changes to a separate file and
@@ -319,13 +325,18 @@ Set the ~:comments~ header-argument to be default
         (:comments . "link")))
 #+end_src
 
+Set up the org roam location.
+#+begin_src emacs-lisp
+(setq org-roam-directory "~/org/roam/")
+#+end_src
+
 There is a weird bug with newlines and ~electric-indent~, so we have to disable
 that for now.
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
-And let's always enable pretty mode
+And let's always enable pretty mode.
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook #'+org-pretty-mode)
 #+end_src

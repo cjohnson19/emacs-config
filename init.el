@@ -161,6 +161,7 @@
         +pandoc
         +journal
         +noter
+        +roam
         +gnuplot
         +present
         +pretty)       ; organize your plain life in plain text
