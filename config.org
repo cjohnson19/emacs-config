@@ -295,6 +295,7 @@ I use [[https://marlam.de/msmtp/msmtp.html#Configuration-files][msmtp]] to send 
 Allows me to write an email in org mode and then it will be converted to html
 when sent.
 #+begin_src emacs-lisp
+(require 'org-msg)
 (setq +org-msg-accent-color "#1a5fb4"
       org-msg-greeting-fmt "\nHi %s,\n\n"
       org-msg-default-alternatives '(html)
@@ -472,7 +473,7 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options. Adds a few extra things to the body
 compared to the default implementation."
   :around #'org-html-template
-  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
       (funcall orig-fn contents info)
     (concat
      (when (and (not (org-html-html5-p info)) (org-html-xhtml-p info))
@@ -531,7 +532,7 @@ compared to the default implementation."
             (if subtitle
                 (format
                  (if html5-fancy
-                     "<br/><span class=\"subtitle\">%s</span>\n"
+                     "<p class=\"subtitle\">%s</p>\n"
                    (concat "\n" (org-html-close-tag "br" nil info) "\n"
                            "<span class=\"subtitle\">%s</span>\n"))
                  (org-export-data subtitle info))
@@ -641,7 +642,7 @@ We define some template files that we read into exported files.
 (defadvice! org-html-src-block-collapsable (orig-fn src-block contents info)
   "Wrap the usual <pre> block in a <details>"
   :around #'org-html-src-block
-  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
       (funcall orig-fn src-block contents info)
     (let* ((properties (cadr src-block))
            (lang (mode-name-to-lang-name
@@ -760,7 +761,7 @@ We define some template files that we read into exported files.
 (after! org
   (defun org-html-block-collapsable (orig-fn block contents info)
     "Wrap the usual block in a <details>"
-    (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+    (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
         (funcall orig-fn block contents info)
       (let ((ref (org-export-get-reference block info))
             (type (pcase (car block)
@@ -800,7 +801,7 @@ We define some template files that we read into exported files.
 (defadvice! org-html-table-wrapped (orig-fn table contents info)
   "Wrap the usual <table> in a <div>"
   :around #'org-html-table
-  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
       (funcall orig-fn table contents info)
     (let* ((name (plist-get (cadr table) :name))
            (ref (org-export-get-reference table info)))
@@ -822,7 +823,7 @@ We define some template files that we read into exported files.
   "Add a label and checkbox to `org-html--format-toc-headline's usual output,
 to allow the TOC to be a collapseable tree."
   :around #'org-html--format-toc-headline
-  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
       (funcall orig-fn headline info)
     (let ((id (or (org-element-property :CUSTOM_ID headline)
                   (org-export-get-reference headline info))))
@@ -834,7 +835,7 @@ Leaves shouldn't have a label on them
 (defadvice! org-html--toc-text-stripped-leaves (orig-fn toc-entries)
   "Remove label"
   :around #'org-html--toc-text
-  (if (or (not org-fancy-html-export-mode) (bound-and-true-p +org-msg-currently-exporting))
+  (if (or (not org-fancy-html-export-mode) (bound-and-true-p org-msg-export-in-progress))
       (funcall orig-fn toc-entries)
     (replace-regexp-in-string "<input [^>]+><label [^>]+>\\(.+?\\)</label></li>" "\\1</li>"
                               (funcall orig-fn toc-entries))))
@@ -865,7 +866,7 @@ Leaves shouldn't have a label on them
   (defun org-export-html-headline-anchor (text backend info)
     (when (and (org-export-derived-backend-p backend 'html)
                org-fancy-html-export-mode)
-      (unless (bound-and-true-p +org-msg-currently-exporting)
+      (unless (bound-and-true-p org-msg-export-in-progress)
         (replace-regexp-in-string
          "<h\\([0-9]\\) id=\"\\([a-z0-9-]+\\)\">\\(.*[^ ]\\)<\\/h[0-9]>" ; this is quite restrictive, but due to `org-reference-contraction' I can do this
          "<h\\1 id=\"\\2\">\\3<a aria-hidden=\"true\" href=\"#\\2\">#</a> </h\\1>"
@@ -1268,7 +1269,7 @@ is selected, only the bare key is returned."
                 (goto-char (point-min))
                 (unless (pos-visible-in-window-p (point-max))
                   (org-fit-window-to-buffer))
-                (let ((pressed (org--mks-read-key allowed-keys prompt)))
+                (let ((pressed (org--mks-read-key allowed-keys prompt nil)))
                   (setq current (concat current pressed))
                   (cond
                    ((equal pressed "\C-g") (user-error "Abort"))
