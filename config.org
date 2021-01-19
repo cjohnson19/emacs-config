@@ -372,7 +372,10 @@ I set it to where it will automatically add a new line when it gets too long.
 
 Let's enable the pretty tables globally
 #+begin_src emacs-lisp
-(setq global-org-pretty-table-mode t)
+;(setq global-org-pretty-table-mode t)
+(use-package! org-pretty-table
+  :config
+  (setq global-org-pretty-table-mode t))
 #+end_src
 
 The built in ellipsis isn't the best communicator for more content being under a heading.
@@ -949,6 +952,18 @@ should save all of the org buffers open so that their modification from the
 agenda is persisted.
 #+begin_src emacs-lisp
 (advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
+#+end_src
+
+By default, habits are not in the time grid. When it comes to habits that I want
+to both track and be aware of their occurrence time, such as lectures, they
+shouldn't take place at the bottom. To fix this, we change the sorting strategy
+that the org-agenda uses.
+#+begin_src emacs-lisp
+(setq org-agenda-sorting-strategy
+      '((agenda time-up priority-down category-keep)
+        (todo priority-down category-keep)
+        (tags priority-down category-keep)
+        (search category-keep)))
 #+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
