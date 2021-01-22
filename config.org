@@ -266,10 +266,10 @@ org mode and email seem long term beneficial.
 #+BEGIN_SRC emacs-lisp
 ;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
 (set-email-account! "uni"
-  '((mu4e-sent-folder       . "/[Gmail]/Sent Mail")
-    (mu4e-drafts-folder     . "/[Gmail]/Drafts")
-    (mu4e-trash-folder      . "/[Gmail]/Trash")
-    (mu4e-refile-folder     . "/[Gmail]/All Mail")
+  '((mu4e-sent-folder       . "/sent")
+    (mu4e-drafts-folder     . "/drafts")
+    (mu4e-trash-folder      . "/trash")
+    ; (mu4e-refile-folder     . "/[Gmail]/All Mail")
     (smtpmail-smtp-user     . "joh13266@umn.edu")
     (user-mail-address      . "joh13266@umn.edu")    ;; only needed for mu < 1.4
     (mu4e-compose-signature . "---\nChase Johnson"))
@@ -1434,10 +1434,14 @@ It doesn't seem to like the prefix key so let's map it!
       "- j"
       #'org-journal-new-entry)
 #+end_src
-*** Noter
+*** COMMENT Noter
 Noter should not take up the entire screen when it is started...
 #+begin_src emacs-lisp
 (setq org-noter-always-create-frame nil)
+(map!
+ :map org-noter-doc-mode-map
+ :n "I" #'org-noter-insert-note-toggle-no-questions
+ :n "i" #'org-noter-insert-note)
 #+end_src
 ** Graphviz
 #+begin_src emacs-lisp
