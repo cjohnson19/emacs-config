@@ -996,7 +996,7 @@ Configuring the basics of agenda
 The current todo keywords aren't the most useful.
 #+begin_src emacs-lisp
 (setq org-todo-keywords
-  '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d!)")
+  '((sequence "TODO(t)" "NEXT(n)" "WAITING(w@/!)" "|" "DONE(d!)")
     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE (a)" "|" "COMPLETED(c)" "CANC(k@)")))
 #+end_src
 
