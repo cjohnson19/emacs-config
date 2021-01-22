@@ -82,10 +82,10 @@ requirements then we'll use default Helvetica with the same font size.
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
 **** Theme
-~doom-one~ is really nice, but I like the slight purple of ~doom-dracula~
-particularly.
+~doom-one~ is really nice, let's try out the ~vibrant~ version for a bit and if I
+don't like it I can always go back to ~doom-dracula~.
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-vibrant)
 #+end_src
 Sometimes the theme will overwrite previous font italic preferences - let's
 prevent that.
