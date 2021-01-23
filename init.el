@@ -26,9 +26,7 @@
        ;;ido               ; the other *other* search engine...
        (ivy
         +icons
-        +prescient
-        +childframe)               ; a search engine for love and life
-
+        +prescient)               ; a search engine for love and life
        :ui
        deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
@@ -44,8 +42,8 @@
        nav-flash         ; blink cursor line after big motions
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
-       (popup +defaults)   ; tame sudden yet inevitable temporary windows
-       tabs              ; a tab bar for Emacs
+       (popup +all +defaults)   ; tame sudden yet inevitable temporary windows
+       ; tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
