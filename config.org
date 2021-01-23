@@ -82,10 +82,11 @@ requirements then we'll use default Helvetica with the same font size.
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
 **** Theme
-~doom-one~ is really nice, let's try out the ~vibrant~ version for a bit and if I
-don't like it I can always go back to ~doom-dracula~.
+~doom-one~ is really nice, but the ~doom-dracula~ theme has a lot better contrast
+between different elements and it is also much more consistent with the rest of
+my setup.
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-vibrant)
+(setq doom-theme 'doom-dracula)
 #+end_src
 Sometimes the theme will overwrite previous font italic preferences - let's
 prevent that.
@@ -307,7 +308,7 @@ when sent.
 ** Daemon
 Let's spin up a server so that other programs can interact with emacs.
 #+begin_src emacs-lisp
-(server-start)
+; (server-start)
 #+end_src
 ** Emacs Anywhere
 Be smart about the mode that Emacs anywhere uses.
@@ -1194,16 +1195,16 @@ Making more visually nice capture templates
                                           "%i %a"))
                               ("Assignment" :keys "a"
                                :icon ("library_books" :set "material" :color "orange")
-                               :template ("* TODO [#B] %{unit-prompt} %? :uni:assignment:"
+                               :template ("* TODO [#B] %{unit-prompt} %? :assignment:"
                                           "DEADLINE: %^{Due date:}T"
                                           "%i %a"))
                               ("Lecture" :keys "l"
                                :icon ("keynote" :set "fileicon" :color "orange")
-                               :template ("* TODO [#C] %{unit-prompt} %? :uni:lecture:"
+                               :template ("* TODO [#C] %{unit-prompt} %? :lecture:"
                                           "%i %a"))
                               ("Miscellaneous task" :keys "u"
                                :icon ("list" :set "faicon" :color "yellow")
-                               :template ("* TODO [#D] %{unit-prompt} %? :uni:"
+                               :template ("* TODO [#D] %{unit-prompt} %?"
                                           "%i %a"))))
                   ("Email" :keys "e"
                    :icon ("envelope" :set "faicon" :color "blue")
@@ -1434,7 +1435,7 @@ It doesn't seem to like the prefix key so let's map it!
       "- j"
       #'org-journal-new-entry)
 #+end_src
-*** COMMENT Noter
+*** Noter
 Noter should not take up the entire screen when it is started...
 #+begin_src emacs-lisp
 (setq org-noter-always-create-frame nil)
