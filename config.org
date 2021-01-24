@@ -1463,3 +1463,9 @@ Better comment line breaks
 #+begin_src emacs-lisp
 (setq-hook! 'ess-r-mode-hook comment-line-break-function nil)
 #+end_src
+** SML
+Professor Nadathur wants some more strict line lengths, so let's reset our fill
+column to reflect his preference of 100 characters.
+#+begin_src emacs-lisp
+(add-hook 'sml-mode-hook (lambda () (set-fill-column 100)))
+#+end_src
