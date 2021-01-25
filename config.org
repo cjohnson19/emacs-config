@@ -1563,7 +1563,11 @@ Better comment line breaks
 #+end_src
 ** SML
 Professor Nadathur wants some more strict line lengths, so let's reset our fill
-column to reflect his preference of 100 characters.
+column to reflect his preference of 100 characters. We also never want to use
+tabs so that we are consistently correctly formatted.
 #+begin_src emacs-lisp
-(add-hook 'sml-mode-hook (lambda () (set-fill-column 100)))
+(defun my-sml-mode-hook ()
+  (setq indent-tabs-mode nil)
+  (lambda () (set-fill-column 100)))
+(add-hook 'sml-mode-hook 'my-sml-mode-hook)
 #+end_src
