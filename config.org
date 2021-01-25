@@ -109,7 +109,7 @@ unread emails I have currently in the modeline.
 **** Splash Image
 I set up a little lambda svg to serve as the splash screen.
 #+begin_src emacs-lisp
-(setq fancy-splash-image (expand-file-name "misc/lambda.svg" doom-private-dir))
+(setq fancy-splash-image (expand-file-name "misc/nebula-transparent.png" doom-private-dir))
 #+end_src
 **** Editor Changes
 I don't know how people get by with absolute line numbers.
