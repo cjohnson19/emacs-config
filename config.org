@@ -1568,6 +1568,6 @@ tabs so that we are consistently correctly formatted.
 #+begin_src emacs-lisp
 (defun my-sml-mode-hook ()
   (setq indent-tabs-mode nil)
-  (lambda () (set-fill-column 100)))
+  (set-fill-column 100))
 (add-hook 'sml-mode-hook 'my-sml-mode-hook)
 #+end_src
