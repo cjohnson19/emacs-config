@@ -163,6 +163,11 @@ Replaces the default org-mode tables with box-drawing characters
 #+begin_src emacs-lisp
 (package! org-pretty-table-mode :recipe (:host github :repo "Fuco1/org-pretty-table") :pin "474ad84a8fe5377d67ab7e491e8e68dac6e37a11")
 #+end_src
+**** Org Alert
+This will notify me when there is an approaching deadline or scheduled event.
+#+begin_src emacs-lisp
+(package! org-alert :pin "f87bff4acbd839acb4d2245b56b2c3d21f950911")
+#+end_src
 *** Fun
 #+begin_src emacs-lisp
 (package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
@@ -246,6 +251,14 @@ Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
 (add-hook! 'after-init-hook #'mu4e-alert-enable-notifications)
 (add-hook! 'after-init-hook #'mu4e-alert-enable-mode-line-display)
 (setq mu4e-alert-email-notification-types '(count))
+#+end_src
+** Org Alert
+#+begin_src emacs-lisp
+(use-package! org-alert
+  :config
+  (setq alert-default-style 'notifier)
+  (setq org-alert-interval 180)
+  (org-alert-enable))
 #+end_src
 * Applications
 ** Mail
