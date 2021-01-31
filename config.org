@@ -182,8 +182,8 @@ This package allows ~mu4e~ to alert me and display the unread email count on the
 Let's always get some completions suggested to us.
 #+begin_src emacs-lisp
 (after! company
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 2))
+  (setq company-idle-delay 1.0
+        company-minimum-prefix-length 3))
   (setq company-show-numbers t)
 #+end_src
 And let's keep a longer memory of what I've typed.
