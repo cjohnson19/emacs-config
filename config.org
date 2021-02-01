@@ -271,7 +271,8 @@ Set up the mail directory and refresh the email's state every 5 minutes.
 #+begin_src emacs-lisp
 (setq +mu4e-mu4e-mail-path "~/.mail/"
       mu4e-update-interval (* 5 60)
-      mu4e-get-mail-command "mbsync -a")
+      mu4e-get-mail-command "mbsync -a"
+      mu4e-change-filenames-when-moving t)
 #+end_src
 
 Set up default email account folder locations and a temporary signature. Very
