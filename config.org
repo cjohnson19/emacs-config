@@ -135,7 +135,11 @@ running ~doom sync~. Afterwards, =M-x doom/reload= updates them.
 Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create
 nice graphics. This is a modified version that adds in ~radar~ charts.
 #+begin_src emacs-lisp
-(package! org-plot :recipe (:local-repo "lisp" :no-byte-compile t))
+(package! org-plot :recipe (:local-repo "lisp/org-plot" :no-byte-compile t))
+#+end_src
+**** Org SML
+#+begin_src emacs-lisp
+(package! ob-sml :recipe (:local-repo "lisp/ob-sml" :no-byte-compile t))
 #+end_src
 **** Org Bullets
 This gives some better heading bullets when in Emacs.
@@ -929,6 +933,7 @@ We define some template files that we read into exported files.
                      ("scheme" "Scheme")
                      ("screen" "Gnu Screen")
                      ("sed" "Sed")
+                     ("sml" "Standard ML")
                      ("sh" "shell")
                      ("sql" "SQL")
                      ("sqlite" "SQLite")
@@ -1324,10 +1329,10 @@ Making more visually nice capture templates
                    :prepend t
                    :headline "Inbox"
                    :type entry
-                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-                              "about %^{topic}"
-                              "%U %i %a"))
+                   :immediate-finish t
+                   :template ("* TODO Follow up with %:fromname :email:"
+                              "Send an email to %:fromname about %:subject"
+                              "%i %a"))
                   ("Interesting" :keys "i"
                    :icon ("eye" :set "faicon" :color "lcyan")
                    :file +org-capture-todo-file
