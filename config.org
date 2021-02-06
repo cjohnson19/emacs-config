@@ -172,6 +172,11 @@ This will notify me when there is an approaching deadline or scheduled event.
 #+begin_src emacs-lisp
 (package! org-alert :pin "f87bff4acbd839acb4d2245b56b2c3d21f950911")
 #+end_src
+**** Fancy Priorities
+This allows priorities to have a special icon
+#+begin_src emacs-lisp
+(package! org-fancy-priorities :pin "819bb993b71e7253cefef7047306ab4e0f9d0a86")
+#+end_src
 *** Fun
 #+begin_src emacs-lisp
 (package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
@@ -653,6 +658,50 @@ Enable ~org-habit~
   (setq org-hide-emphasis-markers t
         org-export-allow-bind-keywords t))
 #+end_src
+**** Org Priorities
+Set up priorities from ~A~ to ~D~.
+#+begin_src emacs-lisp
+(use-package! org-fancy-priorities
+  :ensure t
+  :hook
+  (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '((?A . "⚑")
+                                    (?B . "⬆")
+                                    (?C . "■" )
+                                    (?D . "⬇")
+                                    (?E . "☕"))))
+#+end_src
+**** Ligatures
+#+begin_src emacs-lisp
+(setq org-hide-leading-stars t
+      org-priority-highest ?A
+      org-priority-lowest ?E)
+(appendq! +ligatures-extra-symbols
+          `(:checkbox      "☐"
+            :pending       "◼"
+            :checkedbox    "☑"
+            :list_property "∷"
+            :em_dash       "—"
+            :ellipses      "…"
+            :begin_quote   "❮"
+            :end_quote     "❯"
+            :header        "›"))
+(after! org
+  (set-ligatures! 'org-mode
+    :merge t
+    :checkbox      "[ ]"
+    :pending       "[-]"
+    :checkedbox    "[X]"
+    :list_property "::"
+    :em_dash       "---"
+    :ellipsis      "..."
+    :begin_quote   "#+begin_quote"
+    :end_quote     "#+end_quote"
+    :header        "#+header:"))
+(plist-put +ligatures-extra-symbols :name "⁍")
+#+end_src
+
 *** Exporting (General)
 Nest deeper in the table of contents and headings.
 #+begin_src emacs-lisp
@@ -1307,21 +1356,21 @@ Making more visually nice capture templates
                    :type entry
                    :children (("Test" :keys "t"
                                :icon ("timer" :set "material" :color "red")
-                               :template ("* TODO [#C] %{unit-prompt} %? :uni:test:"
+                               :template ("* TODO [#C] [%{unit-prompt}] %? :uni:test:"
                                           "SCHEDULED: %^{Test date:}T"
                                           "%i %a"))
                               ("Assignment" :keys "a"
                                :icon ("library_books" :set "material" :color "orange")
-                               :template ("* TODO [#B] %{unit-prompt} %? :assignment:"
+                               :template ("* TODO [#B] [%{unit-prompt}] %? :assignment:"
                                           "DEADLINE: %^{Due date:}T"
                                           "%i %a"))
                               ("Lecture" :keys "l"
                                :icon ("keynote" :set "fileicon" :color "orange")
-                               :template ("* TODO [#C] %{unit-prompt} %? :lecture:"
+                               :template ("* TODO [#C] [%{unit-prompt}] %? :lecture:"
                                           "%i %a"))
                               ("Miscellaneous task" :keys "u"
                                :icon ("list" :set "faicon" :color "yellow")
-                               :template ("* TODO [#D] %{unit-prompt} %?"
+                               :template ("* TODO [#D] [%{unit-prompt}] %?"
                                           "%i %a"))))
                   ("Email" :keys "e"
                    :icon ("envelope" :set "faicon" :color "blue")
