@@ -1379,9 +1379,24 @@ Making more visually nice capture templates
                    :headline "Inbox"
                    :type entry
                    :immediate-finish t
-                   :template ("* TODO Follow up with %:fromname :email:"
-                              "Send an email to %:fromname about %:subject"
-                              "%i %a"))
+                   :template ("* TODO %{action} %:fromname :email:"
+                              "%{action} %:fromname about %:subject %{extra}"
+                              "%i %a")
+                   :children (("Follow up" :keys "f"
+                               :icon ("paper-plane" :set "faicon" :color "green")
+                               :action "[#C] Follow up with"
+                               :extra ""
+                               )
+                               ("Follow up with deadline" :keys "d"
+                               :icon ("paper-plane-o" :set "faicon" :color "red")
+                               :action "[#C] Follow up with"
+                               :extra "\nDEADLINE: %^{Deadline:}t"
+                               )
+                              ("Read" :keys "r"
+                               :icon ("book" :set "faicon" :color "blue")
+                               :action "[#D] Read email from"
+                               :extra ""
+                               )))
                   ("Interesting" :keys "i"
                    :icon ("eye" :set "faicon" :color "lcyan")
                    :file +org-capture-todo-file
@@ -1437,7 +1452,7 @@ Making more visually nice capture templates
                    :prepend t
                    :headline "Work"
                    :type entry
-                   :template ("* TODO %? %^G%{extra}"
+                   :template ("* TODO %? %{extra}"
                               "%i %a")
                    :children (("General Task" :keys "k"
                                :icon ("inbox" :set "octicon" :color "yellow")
