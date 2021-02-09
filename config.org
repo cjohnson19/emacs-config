@@ -135,11 +135,11 @@ running ~doom sync~. Afterwards, =M-x doom/reload= updates them.
 Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create
 nice graphics. This is a modified version that adds in ~radar~ charts.
 #+begin_src emacs-lisp
-(package! org-plot :recipe (:local-repo "lisp/org-plot" :no-byte-compile t))
+(package! org-plot :recipe (:local-repo "lisp/org-plot" :build (:not compile)))
 #+end_src
 **** Org SML
 #+begin_src emacs-lisp
-(package! ob-sml :recipe (:local-repo "lisp/ob-sml" :no-byte-compile t))
+(package! ob-sml :recipe (:local-repo "lisp/ob-sml" :build (:not compile)))
 #+end_src
 **** Org Bullets
 This gives some better heading bullets when in Emacs.
