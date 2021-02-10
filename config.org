@@ -1620,11 +1620,17 @@ It doesn't seem to like the prefix key so let's map it!
 Noter should not take up the entire screen when it is started...
 #+begin_src emacs-lisp
 (setq org-noter-always-create-frame nil)
+#+end_src
+
+There is a weird override of the ~i~ binding when viewing the document of a noter
+session. To fix it, we have to map it again.
+#+begin_src emacs-lisp
 (map!
  :map org-noter-doc-mode-map
  :n "I" #'org-noter-insert-note-toggle-no-questions
  :n "i" #'org-noter-insert-note)
 #+end_src
+
 ** Graphviz
 #+begin_src emacs-lisp
 (use-package! grahpviz-dot-mode
