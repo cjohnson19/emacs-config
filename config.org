@@ -1645,9 +1645,9 @@ Better comment line breaks
 (setq-hook! 'ess-r-mode-hook comment-line-break-function nil)
 #+end_src
 ** SML
-Professor Nadathur wants some more strict line lengths, so let's reset our fill
-column to reflect his preference of 100 characters. We also never want to use
-tabs so that we are consistently correctly formatted.
+My professor wants some more strict line lengths, so let's reset our fill column
+to reflect his preference of 100 characters. We also never want to use tabs so
+that we are consistently correctly formatted.
 #+begin_src emacs-lisp
 (defun my-sml-mode-hook ()
   (setq indent-tabs-mode nil)
