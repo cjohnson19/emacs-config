@@ -12,6 +12,6 @@ much of the important information. Consider viewing the raw file.
 
 ## Sources of inspiration
 
-- [tecosaur](https://github.com/tecosaur/emacs-config)
+- Huge thank you to [tecosaur](https://github.com/tecosaur/emacs-config)
 - [daviwil](https://github.com/daviwil/dotfiles/blob/master/Emacs.org)
 - [zzamboni](https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/)
