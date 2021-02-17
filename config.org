@@ -1238,12 +1238,15 @@ that the org-agenda uses.
         (search category-keep)))
 #+end_src
 
-When a task is updated from the agenda, it doesn't trigger the same
-~org-update-statistics-cookies~ function as if it was done in the org file. So,
-when we enter an org file, let's run this function to make sure the statistics
-are up to date.
+When a task is archived, it doesn't trigger the same
+~org-update-statistics-cookies~ function as we want. So, when we archive a task,
+let's run this function to make sure the statistics are up to date.
 #+begin_src emacs-lisp
-(add-hook! org-mode-hook (lambda () (org-update-statistics-cookies t)))
+(defun update-all-statistics ()
+  (interactive)
+  (let ((current-prefix-arg '(4)))
+    (call-interactively 'org-update-statistics-cookies)))
+(advice-add 'org-archive-subtree :after 'update-all-statistics)
 #+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
