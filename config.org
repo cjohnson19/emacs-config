@@ -1237,6 +1237,14 @@ that the org-agenda uses.
         (tags priority-down category-keep)
         (search category-keep)))
 #+end_src
+
+When a task is updated from the agenda, it doesn't trigger the same
+~org-update-statistics-cookies~ function as if it was done in the org file. So,
+when we enter an org file, let's run this function to make sure the statistics
+are up to date.
+#+begin_src emacs-lisp
+(add-hook! org-mode-hook (lambda () (org-update-statistics-cookies t)))
+#+end_src
 **** Super Agenda
 #+begin_src emacs-lisp
 (use-package! org-super-agenda
