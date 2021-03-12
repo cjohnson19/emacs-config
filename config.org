@@ -532,6 +532,25 @@ Affects behaviour of `emacs-anywhere--finalise-content'")
 
 (add-hook 'ea-popup-hook 'ea-popup-handler)
 #+end_src
+** Presenting
+I want to be as clear as possible when I'm sharing my screen. For example,
+ligatures are okay when /I'm/ the only one who sees my editor. But when I'm
+presenting a screen for something like an office hours, I don't want them to
+have to interpret these for their plain text alternatives. So, I'm introducing a
+new interactive function: ~toggle-sharing-screen~ that will remove all of these
+confusing aspects of my config when seen from other eyes and mapping it to ~SPC
+t S~.
+
+#+begin_src emacs-lisp
+(defun toggle-sharing-screen ()
+    "Turn on my-sharing-screen-setup."
+    (interactive)
+  (mac-auto-operator-composition-mode 'toggle)
+  (prettify-symbols-mode 'toggle))
+(map! :leader
+      :desc "Toggle sharing screen" "t S" #'toggle-sharing-screen)
+#+end_src
+
 * Language Configuration
 ** General
 *** File Templates
@@ -865,10 +884,15 @@ of contents as a string, or nil if it is empty."
 
 Let's add some metadata
 #+begin_src emacs-lisp
-(after! ox-html
-  (defun org-html-meta-tags-fancy (title author info)
-    "Use the TITLE, AUTHOR, and INFO plist to generate info used to construct
-the meta tags, as described in `org-html-meta-tags'."
+(defun org-html-meta-tags-fancy (info)
+  "Use the INFO plist to construct the meta tags, as described in `org-html-meta-tags'."
+  (let ((title (org-html-plain-text
+                (org-element-interpret-data (plist-get info :title)) info))
+        (author (and (plist-get info :with-author)
+                     (let ((auth (plist-get info :author)))
+                       ;; Return raw Org syntax.
+                       (and auth (org-html-plain-text
+                                  (org-element-interpret-data auth) info))))))
     (list
      (when (org-string-nw-p author)
        (list "name" "author" author))
@@ -891,10 +915,11 @@ the meta tags, as described in `org-html-meta-tags'."
        (list "property" "og:article:author:first_name" (car (s-split-up-to " " author 2))))
      (when (and (org-string-nw-p author) (s-contains-p " " author))
        (list "property" "og:article:author:last_name" (cadr (s-split-up-to " " author 2))))
-     (list "property" "og:article:published_time" (format-time-string "%FT%T%z"))))
+     (list "property" "og:article:published_time" (format-time-string "%FT%T%z")))))
 
-  (setq org-html-meta-tags-plain (bound-and-true-p org-html-meta-tags)
-        org-html-meta-tags #'org-html-meta-tags-fancy))
+(unless (functionp #'org-html-meta-tags-default)
+  (defalias 'org-html-meta-tags-default #'ignore))
+(setq org-html-meta-tags #'org-html-meta-tags-fancy)
 #+end_src
 **** Custom CSS/JS
 We define some template files that we read into exported files.
