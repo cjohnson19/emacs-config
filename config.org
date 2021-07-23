@@ -52,6 +52,10 @@ when it's in a text based buffer.
 (add-hook! 'markdown-mode-hook 'auto-fill-mode)
 #+end_src
 
+Add a newline to the end of files so git doesn't yell at me.
+#+begin_src emacs-lisp
+(setq require-final-newline t)
+#+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
 That muddies up a pretty sensitive file, so add changes to a separate file and
