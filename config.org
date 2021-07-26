@@ -152,7 +152,7 @@ This gives some better heading bullets when in Emacs.
 **** Graphviz dot
 Creating a ~dot~ src block can create diagrams of data.
 #+begin_src emacs-lisp
-(package! graphviz-dot-mode :pin "3642a0a5f41a80c8ecef7c6143d514200b80e194")
+(package! graphviz-dot-mode)
 #+end_src
 **** Org Super Agenda
 This gives some additional Org-mode features.
@@ -199,7 +199,7 @@ Let's always get some completions suggested to us.
 #+begin_src emacs-lisp
 (after! company
   (setq company-idle-delay 0.5
-        company-minimum-prefix-length 3))
+        company-minimum-prefix-length 1))
   (setq company-show-numbers t)
 #+end_src
 And let's keep a longer memory of what I've typed.
@@ -1678,9 +1678,10 @@ session. To fix it, we have to map it again.
 
 ** Graphviz
 #+begin_src emacs-lisp
-(use-package! grahpviz-dot-mode
-  :commands graphviz-dot-mode
-  :mode ("\\.dot\\'" "\\.gz\\'"))
+(use-package! graphviz-dot-mode
+  :ensure t
+  :config
+  (setq graphviz-dot-indent-width 4))
 
 (use-package! company-graphviz-dot
   :after graphviz-dot-mode)
