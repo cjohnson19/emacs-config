@@ -193,6 +193,11 @@ This package allows ~mu4e~ to alert me and display the unread email count on the
 #+begin_src emacs-lisp
 (package! graphql-mode)
 #+end_src
+*** Adelfa
+Adding in support for [[http://sparrow.cs.umn.edu/adelfa/index.html][Adelfa]].
+#+begin_src emacs-lisp
+(package! adelfa-mode :recipe (:local-repo "lisp/adelfa-mode" :build (:not compile)))
+#+end_src
 * Package Configuration
 ** Company
 Let's always get some completions suggested to us.
