@@ -80,7 +80,6 @@ I really like ~Jetbrains Mono~ for its clarity, but when we have some mixed pitc
 requirements then we'll use default Helvetica with the same font size.
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 15)
-      doom-variable-pitch-font (font-spec :family "Helvetica" :size 15)
       doom-big-font (font-spec :family "Jetbrains Mono" :size 24)
       doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
 #+end_src
