@@ -291,7 +291,7 @@ Tell emacs that I will be using [[https://www.emacswiki.org/emacs/mu4e][mu4e]].
 Set up the mail directory and refresh the email's state every 10 minutes.
 #+begin_src emacs-lisp
 (setq +mu4e-mu4e-mail-path "~/.mail/"
-      mu4e-update-interval (* 10 60)
+      mu4e-update-interval (* 5 60)
       mu4e-get-mail-command "mbsync -a"
       mu4e-change-filenames-when-moving t
       mu4e-index-cleanup t
@@ -337,108 +337,11 @@ when sent.
 (require 'org-msg)
 (setq +org-msg-accent-color "#1a5fb4"
       org-msg-greeting-fmt "\nHi %s,\n\n"
-      org-msg-default-alternatives '(text html)
-      org-msg-signature "\n\n#+begin_signature\nBest,\\\\\nChase\n#+end_signature")
+      org-msg-default-alternatives '(text)
+      org-msg-signature "\n\n#+begin_signature\n-Chase\n#+end_signature")
 (map! :map org-msg-edit-mode-map
       :after org-msg
       :n "G" #'org-msg-goto-body)
-#+end_src
-
-When we send out these org-msg emails, the font size is super small. Let's
-increase it to be more in line with what people expect when it comes to emails.
-#+begin_src emacs-lisp
-(require 'org-msg)
-(setq org-msg-enforce-css
-  (let* ((font-family '(font-family . "sans-serif"))
-         (font-size '(font-size . "11pt"))
-         (font `(,font-family ,font-size))
-         (line-height '(line-height . "13pt"))
-         (bold '(font-weight . "bold"))
-         (theme-color "#0071c5")
-         (color `(color . ,theme-color))
-         (table `(,@font (margin-top . "0px")))
-         (ftl-number `(,@font ,color ,bold (text-align . "left")))
-         (inline-modes '(asl c c++ conf cpp csv diff ditaa emacs-lisp
-                             fundamental ini json makefile man org plantuml
-                             python sh xml))
-         (inline-src `((color . ,(face-foreground 'default))
-                       (background-color . ,(face-background 'default))))
-         (code-src
-          (mapcar (lambda (mode)
-                    `(code ,(intern (concat "src src-" (symbol-name mode)))
-                           ,inline-src))
-                  inline-modes)))
-  `((del nil (,@font (color . "grey") (border-left . "none")
-              (text-decoration . "line-through") (margin-bottom . "0px")
-              (margin-top . "10px") (line-height . "13pt")))
-    (a nil (,color))
-    (a reply-header ((color . "black") (text-decoration . "none")))
-    (div reply-header ((padding . "3.0pt 0in 0in 0in")
-                       (border-top . "solid #e1e1e1 1.0pt")
-                       (margin-bottom . "20px")))
-    (span underline ((text-decoration . "underline")))
-    (li nil (,@font ,line-height (margin-bottom . "0px")
-             (margin-top . "2px")))
-    (nil org-ul ((list-style-type . "square")))
-    (nil org-ol (,@font ,line-height (margin-bottom . "0px")
-                 (margin-top . "0px") (margin-left . "30px")
-                 (padding-top . "0px") (padding-left . "5px")))
-    (nil signature (,@font (margin-bottom . "20px")))
-    (blockquote nil ((padding-left . "5px") (margin-left . "10px")
-                     (margin-top . "20px") (margin-bottom . "0")
-                     (border-left . "3px solid #ccc") (font-style . "italic")
-                     (background . "#f9f9f9")))
-    (code nil (,font-size (font-family . "monospace") (background . "#f9f9f9")))
-    ,@code-src
-    (nil linenr ((padding-right . "1em")
-                 (color . "black")
-                 (background-color . "#aaaaaa")))
-    (pre nil ((line-height . "13pt")
-              ,@inline-src
-              (margin . "0px")
-              (font-size . "12pt")
-              (font-family . "monospace")))
-    (div org-src-container ((margin-top . "10px")))
-    (nil figure-number ,ftl-number)
-    (nil table-number)
-    (caption nil ((text-align . "left")
-                  (background . ,theme-color)
-                  (color . "white")
-                  ,bold))
-    (nil t-above ((caption-side . "top")))
-    (nil t-bottom ((caption-side . "bottom")))
-    (nil listing-number ,ftl-number)
-    (nil figure ,ftl-number)
-    (nil org-src-name ,ftl-number)
-
-    (table nil (,@table ,line-height (border-collapse . "collapse")))
-    (th nil ((border . "1px solid white")
-             (background-color . ,theme-color)
-             (color . "white")
-             (padding-left . "10px") (padding-right . "10px")))
-    (td nil (,@table (padding-left . "10px") (padding-right . "10px")
-                     (background-color . "#f9f9f9") (border . "1px solid white")))
-    (td org-left ((text-align . "left")))
-    (td org-right ((text-align . "right")))
-    (td org-center ((text-align . "center")))
-
-    (div outline-text-4 ((margin-left . "15px")))
-    (div outline-4 ((margin-left . "10px")))
-    (h4 nil ((margin-bottom . "0px") (font-size . "14pt")
-             ,font-family))
-    (h3 nil ((margin-bottom . "0px") (text-decoration . "underline")
-             ,color (font-size . "15pt")
-             ,font-family))
-    (h2 nil ((margin-top . "20px") (margin-bottom . "20px")
-             (font-style . "italic") ,color (font-size . "16pt")
-             ,font-family))
-    (h1 nil ((margin-top . "20px")
-             (margin-bottom . "0px") ,color (font-size . "16pt")
-             ,font-family))
-    (p nil ((text-decoration . "none") (margin-bottom . "0px")
-            (margin-top . "10px") (line-height . "13pt") ,font-size
-            ,font-family))
-    (div nil (,@font (line-height . "13pt"))))))
 #+end_src
 ** Daemon
 Let's spin up a server so that other programs can interact with emacs.
