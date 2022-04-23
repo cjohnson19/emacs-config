@@ -7,15 +7,6 @@
 #+property:     header-args:emacs-lisp :tangle yes :cache yes :results silent :comments link
 #+property:     header-args :tangle no :results silent
 
-#+begin_quote
-When you write a program, think of it primarily as a work of literature. You're
-trying to write something that human beings are going to read. Don't think of it
-primarily as something a computer is going to follow. The more effective you are
-at making your program readable, the more effective it's going to be: You'll
-understand it today, you'll understand it next week, and your successors who are
-going to maintain and modify it will understand it. --- Donald Knuth
-#+end_quote
-
 * Intro
 Creating a fully customized Emacs experience is almost mandatory. So, this is my
 crack at both creating a custom configuration and remaining aware of what I've
@@ -198,12 +189,6 @@ This package allows ~mu4e~ to alert me and display the unread email count on the
 *** GraphQL
 #+begin_src emacs-lisp
 (package! graphql-mode)
-#+end_src
-*** Adelfa
-Adding in support for [[http://sparrow.cs.umn.edu/adelfa/index.html][Adelfa]].
-#+begin_src emacs-lisp
-;;(package! adelfa-mode :recipe (:local-repo "lisp/adelfa-mode" :build (:not compile)))
-;;(package! proof-general :recipe (:local-repo "lisp/PG" :build (:not compile)))
 #+end_src
 *** Agda
 Adding in support for Agda.
@@ -414,11 +399,6 @@ when sent.
 (add-hook! 'org-msg-edit-mode-hook 'visual-fill-column-mode)
 (add-hook! 'org-msg-edit-mode-hook 'turn-off-auto-fill)
 #+end_src
-** Daemon
-Let's spin up a server so that other programs can interact with emacs.
-#+begin_src emacs-lisp
-; (server-start)
-#+end_src
 ** Emacs Anywhere
 Be smart about the mode that Emacs anywhere uses.
 #+begin_src emacs-lisp
@@ -549,19 +529,6 @@ These are defined as a snippet.
 :PROPERTIES:
 :CUSTOM_ID: org
 :END:
-I'm in love with org mode. The learning curve was steep at first, but the
-versatility is so much better. [[https://tecosaur.com/][tecosaur]] outlined why it's so good great here
-
-#+plot: transpose:yes type:radar min:0 max:5 file:"misc/document-format-comparison.png"
-| Format   | Control | Initial Effort | Simplicity | Editor Support | Integrations | Versatility |
-|----------+---------+----------------+------------+----------------+--------------+-------------|
-| Word     |       2 |              4 |          4 |              2 |            3 |           2 |
-| LaTeX    |       4 |              1 |          1 |              3 |            2 |           4 |
-| Org Mode |       4 |              2 |        3.5 |              1 |            4 |           4 |
-| Markdown |       1 |              3 |          3 |              4 |            3 |           1 |
-
-#+attr_html: :class invertible :alt Radar chart comparing document formats
-[[file:misc/document-format-comparison.png]]
 *** Tweaking Defaults
 #+begin_src emacs-lisp
 (setq org-directory "~/Dropbox/org/"
@@ -684,29 +651,6 @@ Set up priorities from ~A~ to ~D~.
 (setq org-hide-leading-stars t
       org-priority-highest ?A
       org-priority-lowest ?E)
-;(appendq! +ligatures-extra-symbols
-;          `(:checkbox      "☐"
-;            :pending       "◼"
-;            :checkedbox    "☑"
-;            :list_property "∷"
-;            :em_dash       "—"
-;            :ellipses      "…"
-;            :begin_quote   "❮"
-;            :end_quote     "❯"
-;            :header        "›"))
-;(after! org
-;  (set-ligatures! 'org-mode
-;    :merge t
-;    :checkbox      "[ ]"
-;    :pending       "[-]"
-;    :checkedbox    "[X]"
-;    :list_property "::"
-;    :em_dash       "---"
-;    :ellipsis      "..."
-;    :begin_quote   "#+begin_quote"
-;    :end_quote     "#+end_quote"
-;    :header        "#+header:"))
-;(plist-put +ligatures-extra-symbols :name "⁍")
 #+end_src
 
 *** Exporting (General)
