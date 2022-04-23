@@ -5,7 +5,5 @@
 #+SUBTITLE:     ${2:}
 #+AUTHOR:       ${3:`user-full-name`}
 #+EMAIL:        ${4:`user-mail-address`}
-#+DATE:         {{{modification-time(%Y-%m-%d %H:%M, t)\}\}\}; {{{timezone\}\}\}
-#+macro:        timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
 #+startup:      overview
 #+LATEX_HEADER: \\usepackage[margin=1in]{geometry\}
