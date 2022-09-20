@@ -213,10 +213,11 @@ Some packages are left pinned in weird spots, let's unpin them.
 #+end_src
 * Package Configuration
 ** Company
-Let's always get some completions suggested to us.
+We always want suggestions, but we should wait a bit. Otherwise, the process
+ends up lagging my editing.
 #+begin_src emacs-lisp
 (after! company
-  (setq company-idle-delay 0.5
+  (setq company-idle-delay 1
         company-minimum-prefix-length 1))
   (setq company-show-numbers t)
 #+end_src
@@ -293,10 +294,17 @@ cd aspell6-en-custom
 (setq ispell-dictionary "en-custom")
 #+end_src
 ** Tramp
-Use a better TRAMP mode form when I'm remotely editing things.
 #+begin_src emacs-lisp
-(setq tramp-default-method "ssh")
 (setq tramp-default-user "joh13266")
+(after! tramp
+  (setq tramp-inline-compress-start-size 1000)
+  (setq tramp-copy-size-limit 10000)
+  (setq vc-handled-backends '(Git))
+  (setq tramp-verbose 1)
+  (setq tramp-default-method "scp")
+  (setq tramp-use-ssh-controlmaster-options nil)
+  (setq projectile--mode-line "Projectile")
+  (setq tramp-verbose 1))
 #+end_src
 ** Which-key
 I want suggestions faster
@@ -356,14 +364,6 @@ Setting up twelf based on [[http://www.twelf.org/wiki/Twelf_with_Emacs][the Twel
 #+begin_src emacs-lisp
 (setq twelf-root "/Users/chasejohnson/twelf/")
 (load (concat twelf-root "emacs/twelf-init.el"))
-#+end_src
-** Proof General
-#+begin_src emacs-lisp
-(defun my-buffer-top-hook ()
-  (with-current-buffer "*goals*"
-    (goto-char (point-max))
-    (message "I was called")))
-(add-hook 'proof-state-change-hook 'my-buffer-top-hook)
 #+end_src
 ** hl-todo
 I'd like my to do always highlighted regardless of what mode I'm in.
@@ -428,7 +428,7 @@ org mode and email seem long term beneficial.
 
 And run mu4e in the background
 #+begin_src emacs-lisp
-(mu4e t)
+;;(mu4e t)
 #+end_src
 *** Sending
 I use [[https://marlam.de/msmtp/msmtp.html#Configuration-files][msmtp]] to send my emails through ~SMTP~.
@@ -1240,6 +1240,18 @@ session. To fix it, we have to map it again.
  :n "I" #'org-noter-insert-note-toggle-no-questions
  :n "i" #'org-noter-insert-note)
 #+end_src
+*** Unicode!
+Okay, this could be an absolutely terrible idea. I'm going to set my ~org-mode~
+input method to be ~Agda~ because I actually really like how they set up almost
+all of the math symbols that I use. I found a mailing list entry about this
+exact issue [[https://lists.chalmers.se/pipermail/agda/2018/010240.html][right here]].
+
+#+begin_src emacs-lisp
+(require 'agda-input)
+(add-hook 'org-mode-hook
+          (lambda nil (set-input-method "Agda")))
+#+end_src
+
 
 ** Graphviz
 #+begin_src emacs-lisp
@@ -1289,6 +1301,11 @@ Set up default viewers for Latex
   (setq TeX-view-program-selection nil)
   (setq +latex-viewers '(skim pdf-tools preview zathura))
   (load! "../.emacs.d/modules/lang/latex/+viewers"))
+#+end_src
+
+Apparently this is a fix I need to make since I'm above Emacs 28??
+#+begin_src emacs-lisp
+(add-hook 'latex-mode-hook #'TeX-latex-mode)
 #+end_src
 ** OCaml
 Set the comment to not add an asterisks on every new line. This way is more
