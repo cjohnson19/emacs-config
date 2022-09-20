@@ -1052,21 +1052,16 @@ Making more visually nice capture templates
                    :prepend t
                    :headline "Work"
                    :type entry
-                   :template ("* TODO %? %{extra}"
+                   :ticket-prompt "%^{Ticket}"
+                   :template ("* TODO [%{ticket-prompt}] %? %{extra}\n [[https://dev.azure.com/reachu/ReachU%20BAU/_workitems/edit/%\\1/][Link to ticket]]"
                               "%i %a")
-                   :children (("General Task" :keys "k"
-                               :icon ("inbox" :set "octicon" :color "yellow")
-                               :extra ""
-                               )
-                              ("Work task with deadline" :keys "d"
-                               :icon ("timer" :set "material" :color "red"
-                                      :v-adjust -0.1)
+                   :children (("Bug Fix" :keys "b"
+                               :icon ("bug_report" :set "material" :color "red")
                                :extra "\nDEADLINE: %^{Deadline:}t")
-                              ("Scheduled Task" :keys "s"
-                               :icon ("calendar" :set "octicon" :color "orange")
-                               :extra "\nSCHEDULED: %^{Start time:}t"
-                               )
-                              ))))))
+                              ("Task" :keys "t"
+                               :icon ("check_circle" :set "material" :color "orange")
+                               :extra "\nDEADLINE: %^{Deadline:}t"))
+                              )))))
 
   (set-org-capture-templates)
   (unless (display-graphic-p)
@@ -1197,6 +1192,21 @@ Get a smaller org-capture frame.
         (set-window-parameter nil 'mode-line-format 'none)
         (org-capture)))
 
+#+end_src
+
+There is a bug in capture right now that means the first time I try to capture
+something the popup buffer doesn't allow me to cancel or save it properly. [[https://github.com/hlissner/doom-emacs/issues/5714][Link
+to the issue here.]]
+#+begin_src emacs-lisp
+(after! org
+  (defadvice! dan/+org--restart-mode-h-careful-restart (fn &rest args)
+    :around #'+org--restart-mode-h
+    (let ((old-org-capture-current-plist (and (bound-and-true-p org-capture-mode)
+                                              (bound-and-true-p org-capture-current-plist))))
+      (apply fn args)
+      (when old-org-capture-current-plist
+        (setq-local org-capture-current-plist old-org-capture-current-plist)
+        (org-capture-mode +1)))))
 #+end_src
 *** Journal
 Set up the journal
