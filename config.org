@@ -199,6 +199,18 @@ Adding in support for Agda.
        ("\\.lagda.md\\'" . agda2-mode))
      auto-mode-alist))
 #+end_src
+*** Coq
+Since I'm running a custom-ish version of PG, I'll install company-coq mode
+myself
+#+begin_src emacs-lisp
+(package! company-coq)
+#+end_src
+*** Ocaml
+Some packages are left pinned in weird spots, let's unpin them.
+
+#+begin_src emacs-lisp
+(unpin! ocamlformat)
+#+end_src
 * Package Configuration
 ** Company
 Let's always get some completions suggested to us.
@@ -225,6 +237,40 @@ And let's keep a longer memory of what I've typed.
     company-ispell
     company-files
     company-yasnippet))
+#+end_src
+*** Coq
+Use the code from the base of Doom
+
+#+begin_src emacs-lisp
+(use-package! company-coq
+  :hook (coq-mode . company-coq-mode)
+  :config
+  (set-popup-rule! "^\\*\\(?:response\\|goals\\)\\*" :ignore t)
+  (set-lookup-handlers! 'company-coq-mode
+    :definition #'company-coq-jump-to-definition
+    :references #'company-coq-grep-symbol
+    :documentation #'company-coq-doc)
+
+  (setq company-coq-disabled-features '(hello company-defaults spinner))
+
+  (if (modulep! :completion company)
+      (define-key coq-mode-map [remap company-complete-common]
+        #'company-indent-or-complete-common)
+    ;; `company-coq''s company defaults impose idle-completion on folks, so
+    ;; we'll set up company ourselves. See
+    ;; https://github.com/cpitclaudel/company-coq/issues/42
+    (add-to-list 'company-coq-disabled-features 'company))
+
+  (map! :map coq-mode-map
+        :localleader
+        "ao" #'company-coq-occur
+        (:prefix "i"
+          "l" #'company-coq-lemma-from-goal
+          "m" #'company-coq-insert-match-construct)
+        (:prefix ("h" . "help")
+          "e" #'company-coq-document-error
+          "E" #'company-coq-browse-error-messages
+          "h" #'company-coq-doc)))
 #+end_src
 ** Ispell
 *** Downloading dictionary
@@ -332,6 +378,19 @@ Add some keybinding to make it easier to use
       :desc "Langtool check"    "l l" #'langtool-check
       :desc "Langtool fix"      "l c" #'langtool-correct-buffer
       :desc "Kill langtool" "l k" #'langtool-check-done)
+#+end_src
+** Proof General
+I don't know why it's so slow to open ~.v~ files...
+#+begin_src emacs-lisp
+(after! core-editor
+  (add-to-list 'doom-detect-indentation-excluded-modes 'coq-mode))
+#+end_src
+** LSP
+LSP is so slow it makes me sad, so I'm going to make it query the server less in
+an attempt to speed it up
+#+begin_src emacs-lisp
+(after! lsp-mode
+  (setq lsp-idle-delay 1.000))
 #+end_src
 * Applications
 ** Mail
@@ -1229,4 +1288,56 @@ idiomatic.
           #'(lambda()
               (setq-local comment-style 'multi-line)
               (setq-local comment-continue "   ")))
+#+end_src
+** Coq
+Adding comments is unbearable since Doom emacs wants to always add new ~(**)~ for
+a newline.
+#+begin_src emacs-lisp
+(setq-hook! 'coq-mode-hook
+  tab-width proof-indent
+  comment-line-break-function nil)
+#+end_src
+
+And set up keybindings based on the base Doom config:
+#+begin_src emacs-lisp
+(setq coq-mode-abbrev-table '())
+(map! :after coq-mode
+      :map coq-mode-map
+      :localleader
+      "]"  #'proof-assert-next-command-interactive
+      "["  #'proof-undo-last-successful-command
+      "."  #'proof-goto-point
+      (:prefix ("l" . "layout")
+        "c" #'pg-response-clear-displays
+        "l" #'proof-layout-windows
+        "p" #'proof-prf)
+      (:prefix ("p" . "proof")
+        "i" #'proof-interrupt-process
+        "p" #'proof-process-buffer
+        "q" #'proof-shell-exit
+        "r" #'proof-retract-buffer)
+      (:prefix ("a" . "about/print/check")
+        "a" #'coq-Print
+        "A" #'coq-Print-with-all
+        "b" #'coq-About
+        "B" #'coq-About-with-all
+        "c" #'coq-Check
+        "C" #'coq-Check-show-all
+        "f" #'proof-find-theorems
+        (:prefix ("i" . "implicits")
+          "b" #'coq-About-with-implicits
+          "c" #'coq-Check-show-implicits
+          "i" #'coq-Print-with-implicits))
+      (:prefix ("g" . "goto")
+        "e" #'proof-goto-command-end
+        "l" #'proof-goto-end-of-locked
+        "s" #'proof-goto-command-start)
+      (:prefix ("i" . "insert")
+        "c" #'coq-insert-command
+        "e" #'coq-end-Section
+        "i" #'coq-insert-intros
+        "r" #'coq-insert-requires
+        "s" #'coq-insert-section-or-module
+        "t" #'coq-insert-tactic
+        "T" #'coq-insert-tactical))
 #+end_src
