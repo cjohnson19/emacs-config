@@ -14,6 +14,7 @@
 \usepackage{amssymb}
 \usepackage{capt-of}
 \usepackage{hyperref}
+\usepackage{ebproof}
 \usepackage[margin=1.5in]{geometry}
 \author{${2:`user-full-name`}}
 \date{\today}
