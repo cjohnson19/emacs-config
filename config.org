@@ -33,7 +33,7 @@ Improving some... /interesting/... default variable choices.
 
 (setq evil-want-fine-undo t  ; Better undo
       auto-save-default t)   ; Don't lose my work
-(setq scroll-margin 2)
+(setq scroll-margin 4)
 #+end_src
 
 Adding hooks to automatically wrap the text when it reaches sufficient length
@@ -45,7 +45,7 @@ when it's in a text based buffer.
 
 Add a newline to the end of files so git doesn't yell at me.
 #+begin_src emacs-lisp
-(setq require-final-newline t)
+(setq require-final-newline 'visit-save)
 #+end_src
 *** Auto-customizations
 When changes are made via a customization interface, they are added to ~init.el~.
@@ -71,16 +71,16 @@ Swap the keybindings for ~Org Capture~ and ~Pop up scratch buffer~
 I really like ~Jetbrains Mono~ for its clarity, but when we have some mixed pitch
 requirements then we'll use default Helvetica with the same font size.
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Jetbrains Mono" :size 15)
-      doom-big-font (font-spec :family "Jetbrains Mono" :size 20)
-      doom-unicode-font (font-spec :family "Jetbrains Mono" :size 15))
+(setq doom-font (font-spec :family "Jetbrains Mono")
+      doom-big-font (font-spec :family "Jetbrains Mono")
+      doom-unicode-font (font-spec :family "Jetbrains Mono"))
 #+end_src
 **** Theme
-~doom-one~ is really nice, but the ~doom-dracula~ theme has a lot better contrast
-between different elements and it is also much more consistent with the rest of
-my setup.
+~doom-one~ is really nice, and ~doom-dracula~ matches up with the rest of my setup
+but it simply doesn't italicize as much as I'd like it to. I'll try out
+~doom-monokai~ for a bit and see how that works out.
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-monokai-classic)
 #+end_src
 Sometimes the theme will overwrite previous font italic preferences - let's
 prevent that.
@@ -100,15 +100,10 @@ unread emails I have currently in the modeline.
         doom-modeline-continuous-word-count-modes '(org-mode markdown-mode)
         doom-modeline-mu4e t))
 #+end_src
-**** Splash Image
-I set up a little lambda svg to serve as the splash screen.
+*** Blank Line Behavior
+I /want/ the blank lines
 #+begin_src emacs-lisp
-(setq fancy-splash-image (expand-file-name "misc/nebula-transparent.png" doom-private-dir))
-#+end_src
-**** Editor Changes
-I don't know how people get by with absolute line numbers.
-#+begin_src emacs-lisp
-(setq display-line-numbers-type 'relative)
+(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
 #+end_src
 * Package Loading
 :PROPERTIES:
@@ -124,6 +119,22 @@ This file shouldn't be byte compiled.
 :END:
 This is where we install packages, by declaring them with ~package!~ macro, then
 running ~doom sync~. Afterwards, =M-x doom/reload= updates them.
+*** Bug Fix
+**** Straight location
+There's some weird bug at the moment with straight so I have to install it here.
+#+begin_src emacs-lisp
+(package! straight :pin "3eca39d")
+#+end_src
+**** Emacs 29 Compatibility
+#+begin_src emacs-lisp
+(package! transient
+      :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440"
+      :recipe (:host github :repo "magit/transient"))
+
+(package! with-editor
+          :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab"
+          :recipe (:host github :repo "magit/with-editor"))
+#+end_src
 *** Org Mode
 **** Org Plot
 Emacs has integration with ~GNUPlot~, let's use that to plot some tables to create
@@ -135,6 +146,10 @@ nice graphics. This is a modified version that adds in ~radar~ charts.
 #+begin_src emacs-lisp
 (package! ob-sml :recipe (:local-repo "lisp/ob-sml" :build (:not compile)))
 #+end_src
+**** Proof general
+#+begin_src emacs-lisp
+;;(package! proof-general :recipe (:local-repo "lisp/PG" :build (:not compile)))
+#+end_src
 **** Org Bullets
 This gives some better heading bullets when in Emacs.
 #+begin_src emacs-lisp
@@ -143,7 +158,7 @@ This gives some better heading bullets when in Emacs.
 **** Graphviz dot
 Creating a ~dot~ src block can create diagrams of data.
 #+begin_src emacs-lisp
-(package! graphviz-dot-mode)
+;;(package! graphviz-dot-mode)
 #+end_src
 **** Org Super Agenda
 This gives some additional Org-mode features.
@@ -171,34 +186,6 @@ This allows priorities to have a special icon
 #+begin_src emacs-lisp
 (package! org-fancy-priorities :pin "819bb993b71e7253cefef7047306ab4e0f9d0a86")
 #+end_src
-*** Fun
-**** xkcd
-#+begin_src emacs-lisp
-(package! xkcd :pin "66e928706fd660cfdab204c98a347b49c4267bdf")
-#+end_src
-**** Elcord
-I think having rich presence on my Emacs would be pretty funny.
-#+begin_src emacs-lisp
-(package! elcord)
-#+end_src
-*** Mail
-This package allows ~mu4e~ to alert me and display the unread email count on the modeline.
-#+begin_src emacs-lisp
-(package! mu4e-alert)
-#+end_src
-*** GraphQL
-#+begin_src emacs-lisp
-(package! graphql-mode)
-#+end_src
-*** Agda
-Adding in support for Agda.
-#+begin_src emacs-lisp
-(setq auto-mode-alist
-   (append
-     '(("\\.agda\\'" . agda2-mode)
-       ("\\.lagda.md\\'" . agda2-mode))
-     auto-mode-alist))
-#+end_src
 *** Coq
 Since I'm running a custom-ish version of PG, I'll install company-coq mode
 myself
@@ -210,6 +197,12 @@ Some packages are left pinned in weird spots, let's unpin them.
 
 #+begin_src emacs-lisp
 (unpin! ocamlformat)
+(unpin! merlin)
+#+end_src
+*** Imenu
+I want a hierarchy tree so I'm installing imenu-list
+#+begin_src emacs-lisp
+(package! imenu-list :recipe (:local-repo "list/imenu-list" :build (:not compile)))
 #+end_src
 * Package Configuration
 ** Company
@@ -273,26 +266,6 @@ Use the code from the base of Doom
           "E" #'company-coq-browse-error-messages
           "h" #'company-coq-doc)))
 #+end_src
-** Ispell
-*** Downloading dictionary
-I got a dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary]] with the following options
-| Size       | Spelling(s) | Diacritic Handling | Special Lists  | Format |
-|------------+-------------+--------------------+----------------+--------|
-| 70 (large) | American    | Keep               | Hacker & Roman | Aspell |
-**** Installing Dictionary
-#+begin_src shell :tangle no
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" "http://app.aspell.net/create?max_size=70&spelling=US&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell"
-tar -xjf "aspell6-en-custom.tar.bz2"
-
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
-*** Configuration
-#+begin_src emacs-lisp
-(setq ispell-local-dictionary (expand-file-name  ".ispell_personal" doom-private-dir))
-(setq ispell-dictionary "en-custom")
-#+end_src
 ** Tramp
 #+begin_src emacs-lisp
 (setq tramp-default-user "joh13266")
@@ -310,24 +283,6 @@ cd aspell6-en-custom
 I want suggestions faster
 #+begin_src emacs-lisp
 (setq which-key-idle-delay 0.5)
-#+end_src
-** xkcd
-Set up better commands
-#+begin_src emacs-lisp
-(use-package! xkcd
-  :commands (xkcd-get-json
-             xkcd-download xkcd-get)
-  :config
-  (after! evil-snipe
-    (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode)))
-#+end_src
-** Mail
-Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
-#+begin_src emacs-lisp
-(mu4e-alert-set-default-style 'notifier)
-(add-hook! 'after-init-hook #'mu4e-alert-enable-notifications)
-(add-hook! 'after-init-hook #'mu4e-alert-enable-mode-line-display)
-(setq mu4e-alert-email-notification-types '(count))
 #+end_src
 ** Org Alert
 #+begin_src emacs-lisp
@@ -353,17 +308,11 @@ Set up ~mu4e-alert~ to use ~terminal-notifier~ and send changes to the modeline.
   (load-file proof-site-file))
 (setq auto-mode-alist
    (append
-     '(("\\.ath\\'" . adelfa-mode))
+     '(("\\.ath\\'" . adelfa-mode) ("\\.thm\\'" . abella-mode))
      auto-mode-alist))
 (add-hook 'adelfa-mode-hook
           #'(lambda ()
               (setq indent-line-function 'indent-relative)))
-#+end_src
-** Twelf
-Setting up twelf based on [[http://www.twelf.org/wiki/Twelf_with_Emacs][the Twelf Wiki]] instructions.
-#+begin_src emacs-lisp
-(setq twelf-root "/Users/chasejohnson/twelf/")
-(load (concat twelf-root "emacs/twelf-init.el"))
 #+end_src
 ** hl-todo
 I'd like my to do always highlighted regardless of what mode I'm in.
@@ -389,189 +338,8 @@ I don't know why it's so slow to open ~.v~ files...
 LSP is so slow it makes me sad, so I'm going to make it query the server less in
 an attempt to speed it up
 #+begin_src emacs-lisp
-(after! lsp-mode
-  (setq lsp-idle-delay 1.000))
-#+end_src
-* Applications
-** Mail
-Tell emacs that I will be using [[https://www.emacswiki.org/emacs/mu4e][mu4e]].
-#+begin_src emacs-lisp
-(setq mail-user-agent 'mu4e-user-agent)
-#+end_src
-*** Receiving
-Set up the mail directory and refresh the email's state every 10 minutes.
-#+begin_src emacs-lisp
-(setq +mu4e-mu4e-mail-path "~/.mail/"
-      mu4e-update-interval (* 5 60)
-      mu4e-get-mail-command "mbsync -a"
-      mu4e-change-filenames-when-moving t
-      mu4e-index-cleanup t
-      mu4e-headers-include-related nil)
-#+end_src
-
-Set up default email account folder locations and a temporary signature. Very
-likely, I will not be sending any emails from Emacs, but the integrations with
-org mode and email seem long term beneficial.
-#+BEGIN_SRC emacs-lisp
-;; Each path is relative to `+mu4e-mu4e-mail-path', which is ~/.mail by default
-(set-email-account! "uni"
-  '((mu4e-sent-folder       . "/sent")
-    (mu4e-drafts-folder     . "/drafts")
-    (mu4e-trash-folder      . "/trash")
-    ; (mu4e-refile-folder     . "/[Gmail]/All Mail")
-    (smtpmail-smtp-user     . "joh13266@umn.edu")
-    (user-mail-address      . "joh13266@umn.edu")    ;; only needed for mu < 1.4
-    ;(mu4e-compose-signature . "---\nChase Johnson"))
-    )
-  t)
-#+END_SRC
-
-And run mu4e in the background
-#+begin_src emacs-lisp
-;;(mu4e t)
-#+end_src
-*** Sending
-I use [[https://marlam.de/msmtp/msmtp.html#Configuration-files][msmtp]] to send my emails through ~SMTP~.
-
-#+begin_src emacs-lisp
-(after! mu4e
-  (setq sendmail-program "/usr/local/bin/msmtp"
-        send-mail-function #'smtpmail-send-it
-        message-sendmail-f-is-evil t
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-send-mail-function #'message-send-mail-with-sendmail))
-#+end_src
-**** Org Msg
-Allows me to write an email in org mode and then it will be converted to html
-when sent.
-#+begin_src emacs-lisp
-(require 'org-msg)
-(setq +org-msg-accent-color "#1a5fb4"
-      org-msg-greeting-fmt "\nHi%s,\n"
-      org-msg-default-alternatives '(text)
-      org-msg-signature "\n#+begin_signature\n-Chase\n#+end_signature")
-(map! :map org-msg-edit-mode-map
-      :after org-msg
-      :n "G" #'org-msg-goto-body)
-(add-hook! 'org-msg-edit-mode-hook 'visual-fill-column-mode)
-(add-hook! 'org-msg-edit-mode-hook 'turn-off-auto-fill)
-#+end_src
-** Emacs Anywhere
-Be smart about the mode that Emacs anywhere uses.
-#+begin_src emacs-lisp
-(defun markdown-window-p (window-title)
-  "Judges from WINDOW-TITLE whether the current window likes markdown"
-  (if (string-match-p (rx (or "Stack Exchange" "Stack Overflow"
-                              "Pull Request" "Issue" "Discord"))
-                      window-title) t nil))
-#+end_src
-
-When the window opens, we will use a specific location.
-#+begin_src emacs-lisp
-(defvar emacs-anywhere--active-markdown nil
-  "Whether the buffer started off as markdown.
-Affects behaviour of `emacs-anywhere--finalise-content'")
-
-(defun emacs-anywhere--finalise-content (&optional _frame)
-  (when emacs-anywhere--active-markdown
-    (fundamental-mode)
-    (goto-char (point-min))
-    (insert "#+property: header-args :exports both\n#+options: toc:nil\n")
-    (rename-buffer "*EA Pre Export*")
-    (org-export-to-buffer 'gfm ea--buffer-name)
-    (kill-buffer "*EA Pre Export*"))
-  (gui-select-text (buffer-string)))
-
-(define-minor-mode emacs-anywhere-mode
-  "To tweak the current buffer for some emacs-anywhere considerations"
-  :init-value nil
-  :keymap (list
-           ;; Finish edit, but be smart in org mode
-           (cons (kbd "C-c C-c")
-                 (cmd! (if (and (eq major-mode 'org-mode)
-                                (org-in-src-block-p))
-                           (org-ctrl-c-ctrl-c)
-                         (delete-frame))))
-           ;; Abort edit. emacs-anywhere saves the current edit for next time.
-           (cons (kbd "C-c C-k")
-                 (cmd! (setq ea-on nil)
-                       (delete-frame))))
-   (when emacs-anywhere-mode
-    ;; line breaking
-    (turn-off-auto-fill)
-    (visual-line-mode t)
-    ;; DEL/C-SPC to clear (first keystroke only)
-    (set-transient-map (let ((keymap (make-sparse-keymap)))
-                         (define-key keymap (kbd "DEL")   (cmd! (delete-region (point-min) (point-max))))
-                         (define-key keymap (kbd "C-SPC") (cmd! (delete-region (point-min) (point-max))))
-                         keymap))
-    ;; disable tabs
-    (when (bound-and-true-p centaur-tabs-mode)
-      (centaur-tabs-local-mode t))))
-(defun ea-popup-handler (app-name window-title x y w h)
-  (interactive)
-  (set-frame-size (selected-frame) 80 12)
-  ;; position the frame near the mouse
-  (let* ((mousepos (split-string (shell-command-to-string "xdotool getmouselocation 2>/dev/null| sed -E \"s/ screen:0 window:[^ ]*|x:|y://g\"")))
-         (mouse-x (- (string-to-number (nth 0 mousepos)) 50))
-         (mouse-y (- (string-to-number (nth 1 mousepos)) 25)))
-    (set-frame-position (selected-frame) mouse-x mouse-y))
-
-  (set-frame-name (concat "Quick Edit ∷ " ea-app-name " — "
-                          (truncate-string-to-width
-                           (string-trim
-                            (string-trim-right window-title
-                                               (format "-[A-Za-z0-9 ]*%s" ea-app-name))
-                            "[\s-]+" "[\s-]+")
-                           45 nil nil "…")))
-  (message "window-title: %s" window-title)
-
-  (when-let ((selection (gui-get-selection 'PRIMARY)))
-    (insert selection))
-
-  ;; convert buffer to org mode if markdown
-  (when (markdown-window-p window-title)
-    (shell-command-on-region (point-min) (point-max)
-                             "pandoc -f markdown -t org" nil t)
-    (deactivate-mark) (goto-char (point-max)))
-
-  ;; remove any blank newline at end
-  (delete-trailing-whitespace)
-  (delete-char (- (skip-chars-backward "\n")))
-
-  ;; set major mode
-  (org-mode)
-
-  ;; set markdown status
-  (setq-local emacs-anywhere--active-markdown (markdown-window-p window-title))
-
-  (advice-add 'ea--delete-frame-handler :before #'emacs-anywhere--finalise-content)
-
-  ;; I'll be honest with myself, I /need/ spellcheck
-  (spell-fu-buffer)
-
-  (evil-insert-state) ; start in insert
-  (emacs-anywhere-mode 1))
-
-(add-hook 'ea-popup-hook 'ea-popup-handler)
-#+end_src
-** Presenting
-I want to be as clear as possible when I'm sharing my screen. For example,
-ligatures are okay when /I'm/ the only one who sees my editor. But when I'm
-presenting a screen for something like an office hours, I don't want them to
-have to interpret these for their plain text alternatives. So, I'm introducing a
-new interactive function: ~toggle-sharing-screen~ that will remove all of these
-confusing aspects of my config when seen from other eyes and mapping it to ~SPC
-t S~.
-
-#+begin_src emacs-lisp
-(defun toggle-sharing-screen ()
-    "Turn on my-sharing-screen-setup."
-    (interactive)
-  (mac-auto-operator-composition-mode 'toggle)
-  (prettify-symbols-mode 'toggle))
-(map! :leader
-      :desc "Toggle sharing screen" "t S" #'toggle-sharing-screen)
+;; (after! lsp-mode
+  ;; (setq lsp-idle-delay 1.000))
 #+end_src
 * Language Configuration
 ** General
@@ -886,7 +654,7 @@ Making more visually nice capture templates
 (after! org-capture
   <<prettify-capture>>
   (setq +org-capture-uni-units (condition-case nil
-                                   (split-string (f-read-text "~/Dropbox/org/.uni-units") "\n")
+                                   '("8980 - Functional Algorithm Design in Haskell")
                                  (error nil)))
 
   (defun +doct-icon-declaration-to-icon (declaration)
@@ -989,12 +757,12 @@ Making more visually nice capture templates
                    :type entry
                    :children (("Task with deadline" :keys "d"
                                :icon ("library_books" :set "material" :color "orange")
-                               :template ("* TODO %?"
+                               :template ("* TODO %? :research:"
                                           "DEADLINE: %^{Due date:}T"
                                           "%i %a"))
                               ("General Task" :keys "t"
                                :icon ("keynote" :set "fileicon" :color "green")
-                               :template ("* TODO %?"
+                               :template ("* TODO %? :research"
                                           "%i %a")))
                    )
                   ("Interesting" :keys "i"
@@ -1240,29 +1008,7 @@ session. To fix it, we have to map it again.
  :n "I" #'org-noter-insert-note-toggle-no-questions
  :n "i" #'org-noter-insert-note)
 #+end_src
-*** Unicode!
-Okay, this could be an absolutely terrible idea. I'm going to set my ~org-mode~
-input method to be ~Agda~ because I actually really like how they set up almost
-all of the math symbols that I use. I found a mailing list entry about this
-exact issue [[https://lists.chalmers.se/pipermail/agda/2018/010240.html][right here]].
 
-#+begin_src emacs-lisp
-(require 'agda-input)
-(add-hook 'org-mode-hook
-          (lambda nil (set-input-method "Agda")))
-#+end_src
-
-
-** Graphviz
-#+begin_src emacs-lisp
-(use-package! graphviz-dot-mode
-  :ensure t
-  :config
-  (setq graphviz-dot-indent-width 4))
-
-(use-package! company-graphviz-dot
-  :after graphviz-dot-mode)
-#+end_src
 ** Rust
 Set up a rust server
 #+begin_src emacs-lisp
@@ -1272,16 +1018,6 @@ Set up a rust server
 Better comment line breaks
 #+begin_src emacs-lisp
 (setq-hook! 'ess-r-mode-hook comment-line-break-function nil)
-#+end_src
-** SML
-My professor wants some more strict line lengths, so let's reset our fill column
-to reflect his preference of 100 characters. We also never want to use tabs so
-that we are consistently correctly formatted.
-#+begin_src emacs-lisp
-(defun my-sml-mode-hook ()
-  (setq indent-tabs-mode nil)
-  (set-fill-column 100))
-(add-hook 'sml-mode-hook 'my-sml-mode-hook)
 #+end_src
 ** Web Mode
 The default indentation is 4 for web mode and they're already so long. Let's
@@ -1299,7 +1035,7 @@ Set up default viewers for Latex
 #+begin_src emacs-lisp
 (after! tex
   (setq TeX-view-program-selection nil)
-  (setq +latex-viewers '(skim pdf-tools preview zathura))
+  (setq +latex-viewers '(skim pdf-tools preview))
   (load! "../.emacs.d/modules/lang/latex/+viewers"))
 #+end_src
 
@@ -1312,7 +1048,7 @@ Set the comment to not add an asterisks on every new line. This way is more
 idiomatic.
 #+begin_src emacs-lisp
 (add-hook 'tuareg-mode-hook
-          #'(lambda()
+          (lambda()
               (setq-local comment-style 'multi-line)
               (setq-local comment-continue "   ")))
 #+end_src
